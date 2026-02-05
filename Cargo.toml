@@ -16,3 +16,4 @@ thiserror = "2.0"
 dirs = "5.0"
 chrono = "0.4"
 
+[dev-dependencies]

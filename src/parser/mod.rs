@@ -1,5 +1,11 @@
 use std::collections::HashMap;
 
+mod wikilink;
+mod markdown;
+
+pub use wikilink::{extract_wikilinks, parse_wikilink};
+pub use markdown::{extract_markdown_links, build_markdown_link};
+
 #[derive(Debug, Clone)]
 pub struct ParsedNote {
     pub title: String,
@@ -16,6 +22,22 @@ pub struct Link {
     pub heading_ref: Option<String>,
     pub block_ref: Option<String>,
     pub is_embed: bool,
+    pub link_type: LinkType,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LinkType {
+    Wiki,
+    Markdown,
+}
+
+impl LinkType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            LinkType::Wiki => "wikilink",
+            LinkType::Markdown => "markdown",
+        }
+    }
 }
 
 pub struct MarkdownParser;
@@ -24,7 +46,7 @@ impl MarkdownParser {
     pub fn parse(content: &str) -> ParsedNote {
         let (frontmatter, rest) = Self::extract_frontmatter(content);
         let tags = Self::extract_tags(&frontmatter, &rest);
-        let links = Self::extract_wikilinks(&rest);
+        let links = Self::extract_links(&rest);
         let title = Self::extract_title(&frontmatter, &rest);
 
         ParsedNote {
@@ -126,94 +148,24 @@ impl MarkdownParser {
         tags
     }
 
-    fn extract_wikilinks(content: &str) -> Vec<Link> {
-        let mut links = Vec::new();
-        let content_chars: Vec<char> = content.chars().collect();
-        let mut pos = 0;
-
-        while pos < content_chars.len() {
-            // Check for wikilink or embed
-            if pos + 1 < content_chars.len() {
-                let is_embed = content_chars[pos] == '!' && content_chars[pos + 1] == '[';
-                let is_wikilink = content_chars[pos] == '[' && content_chars[pos + 1] == '[';
-
-                if is_embed {
-                    // ![[...]]
-                    if let Some(link) = Self::parse_wikilink(&content_chars, pos + 1, true) {
-                        links.push(link);
-                    }
-                    pos += 1;
-                } else if is_wikilink {
-                    // [[...]]
-                    if let Some(link) = Self::parse_wikilink(&content_chars, pos, false) {
-                        links.push(link);
-                    }
-                    pos += 1;
-                }
-            }
-            pos += 1;
-        }
-
+    fn extract_links(content: &str) -> Vec<Link> {
+        let mut links = extract_wikilinks(content);
+        links.extend(extract_markdown_links(content));
         links
     }
+}
 
-    fn parse_wikilink(chars: &[char], start: usize, is_embed: bool) -> Option<Link> {
-        if start + 3 >= chars.len() || chars[start] != '[' || chars[start + 1] != '[' {
-            return None;
-        }
-
-        let mut end = start + 2;
-        while end + 1 < chars.len() && !(chars[end] == ']' && chars[end + 1] == ']') {
-            end += 1;
-        }
-
-        if end + 1 >= chars.len() {
-            return None;
-        }
-
-        let content: String = chars[start + 2..end].iter().collect();
-        let (text, alias, heading_ref, block_ref) = Self::parse_link_content(&content);
-
-        Some(Link {
-            text,
-            alias,
-            heading_ref,
-            block_ref,
-            is_embed,
-        })
+pub fn normalize_note_identifier(raw: &str) -> String {
+    let mut value = raw.trim().to_string();
+    if value.starts_with("./") {
+        value = value.trim_start_matches("./").to_string();
     }
-
-    fn parse_link_content(content: &str) -> (String, Option<String>, Option<String>, Option<String>) {
-        let mut alias = None;
-        let mut heading_ref = None;
-        let mut block_ref = None;
-
-        // Check for pipe (alias)
-        let text = if let Some(pipe_pos) = content.find('|') {
-            let t = content[..pipe_pos].trim().to_string();
-            alias = Some(content[pipe_pos + 1..].trim().to_string());
-            t
-        } else {
-            content.to_string()
-        };
-
-        // Check for heading reference
-        let text = if let Some(hash_pos) = text.find('#') {
-            let heading = text[hash_pos + 1..].trim().to_string();
-            let t = text[..hash_pos].trim().to_string();
-
-            if heading.starts_with('^') {
-                block_ref = Some(heading[1..].to_string());
-            } else {
-                heading_ref = Some(heading);
-            }
-            t
-        } else {
-            text
-        };
-
-        (text, alias, heading_ref, block_ref)
+    value = value.replace('\\', "/");
+    if value.ends_with(".md") || value.ends_with(".MD") {
+        let len = value.len();
+        value = value[..len.saturating_sub(3)].to_string();
     }
+    value.trim().to_string()
 }
 
 #[cfg(test)]
@@ -233,5 +185,20 @@ mod tests {
         assert_eq!(parsed.links.len(), 1);
         assert_eq!(parsed.links[0].text, "note");
         assert_eq!(parsed.links[0].alias, Some("alias".to_string()));
+    }
+
+    #[test]
+    fn test_parse_markdown_link_basic() {
+        let parsed = MarkdownParser::parse("See [Doc](docs/Note.md)");
+        assert_eq!(parsed.links.len(), 1);
+        assert_eq!(parsed.links[0].text, "docs/Note");
+        assert_eq!(parsed.links[0].alias, Some("Doc".to_string()));
+        assert_eq!(parsed.links[0].link_type, LinkType::Markdown);
+    }
+
+    #[test]
+    fn test_normalize_note_identifier() {
+        assert_eq!(normalize_note_identifier("./Note.md"), "Note");
+        assert_eq!(normalize_note_identifier("Folder\\Note.md"), "Folder/Note");
     }
 }

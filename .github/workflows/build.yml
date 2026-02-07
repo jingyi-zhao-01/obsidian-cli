@@ -64,6 +64,7 @@ jobs:
   
   build:
     name: Build Release Binaries
+    needs: test
     strategy:
       matrix:
         include:

@@ -1,0 +1,36 @@
+---
+title: Phase 6 - Incremental Indexing
+---
+flowchart TD
+	start(["Start: index run"]) --> scan["Scan vault & collect file metadata"]
+	scan --> diff{"Any changes since last scan?"}
+
+	diff -- "No" --> quick["Skip indexing (fast path)"] --> finish(["Finish"])
+
+	diff -- "Yes" --> categorize["Categorize changes"]
+	categorize --> newMod["New or modified files"]
+	categorize --> deleted["Deleted files"]
+
+	subgraph ingest ["Ingest new/modified"]
+		direction TB
+		parse["Parse markdown & frontmatter"] --> extract["Extract links/tags"]
+		extract --> chunk["Chunk content"]
+		chunk --> upsert["Upsert notes, tags, links, chunks"]
+	end
+
+	newMod --> parse
+
+	subgraph remove ["Remove deleted"]
+		direction TB
+		purge["Delete note rows & dependent data"]
+	end
+
+	deleted --> purge
+
+	upsert --> resolve["Re-resolve unresolved links"]
+	purge --> resolve
+
+	resolve --> batch["Batch DB writes & commit"]
+	batch --> state["Persist scan state"]
+	state --> progress["Report progress & stats"]
+	progress --> finish

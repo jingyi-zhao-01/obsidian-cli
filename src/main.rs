@@ -7,6 +7,7 @@ use obsidian_cli_inspector::{
     logger::Logger,
 };
 use std::path::PathBuf;
+use std::time::Instant;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -18,20 +19,21 @@ fn main() -> Result<()> {
         None
     };
 
-    let result = match cli.command {
+    let start = Instant::now();
+    let (command_name, result) = match cli.command {
         Commands::Init { force } => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("init", "Starting Init Command");
             }
-            initialize_database(&config, force, logger.as_ref())
+            ("init", initialize_database(&config, force, logger.as_ref()))
         }
         Commands::Stats => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("stats", "Starting Stats Command");
             }
-            show_stats(&config, logger.as_ref())
+            ("stats", show_stats(&config, logger.as_ref()))
         }
         Commands::Index {
             dry_run,
@@ -42,60 +44,78 @@ fn main() -> Result<()> {
             if let Some(ref log) = logger {
                 let _ = log.log_section("index", "Starting Index Command");
             }
-            index_vault(&config, dry_run, force, verbose, logger.as_ref())
+            (
+                "index",
+                index_vault(&config, dry_run, force, verbose, logger.as_ref()),
+            )
         }
         Commands::Search { query, limit } => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("search", "Starting Search Command");
             }
-            search_vault(&config, &query, limit, logger.as_ref())
+            (
+                "search",
+                search_vault(&config, &query, limit, logger.as_ref()),
+            )
         }
         Commands::Backlinks { note } => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("backlinks", "Starting Backlinks Command");
             }
-            get_backlinks(&config, &note, logger.as_ref())
+            ("backlinks", get_backlinks(&config, &note, logger.as_ref()))
         }
         Commands::Links { note } => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("links", "Starting Links Command");
             }
-            get_forward_links(&config, &note, logger.as_ref())
+            ("links", get_forward_links(&config, &note, logger.as_ref()))
         }
         Commands::UnresolvedLinks => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("unresolved", "Starting Unresolved Links Command");
             }
-            list_unresolved_links(&config, logger.as_ref())
+            (
+                "unresolved-links",
+                list_unresolved_links(&config, logger.as_ref()),
+            )
         }
         Commands::Tags { tag, all } => {
             let config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("tags", "Starting Tags Command");
             }
-            list_notes_by_tag(&config, &tag, all, logger.as_ref())
+            (
+                "tags",
+                list_notes_by_tag(&config, &tag, all, logger.as_ref()),
+            )
         }
         Commands::Suggest { note, limit } => {
             show_suggest(&note, limit, logger.as_ref());
-            Ok(())
+            ("suggest", Ok(()))
         }
         Commands::Bloat { threshold, limit } => {
             show_bloat(threshold, limit, logger.as_ref());
-            Ok(())
+            ("bloat", Ok(()))
         }
         Commands::Tui => {
             show_tui(logger.as_ref());
-            Ok(())
+            ("tui", Ok(()))
         }
         Commands::Graph { note, depth } => {
             show_graph(&note, depth, logger.as_ref());
-            Ok(())
+            ("graph", Ok(()))
         }
     };
+    let elapsed = start.elapsed();
+    if result.is_ok() {
+        println!("Command '{}' completed in {:.2?}", command_name, elapsed);
+    } else {
+        eprintln!("Command '{}' failed after {:.2?}", command_name, elapsed);
+    }
 
     result
 }

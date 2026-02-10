@@ -20,18 +20,40 @@ fn get_tags_for_note(conn: &Connection, note_id: i64) -> Result<Vec<String>> {
     Ok(tag_list)
 }
 
+fn collect_string_column(
+    rows: rusqlite::MappedRows<impl FnMut(&rusqlite::Row<'_>) -> Result<String>>,
+) -> Result<Vec<String>> {
+    let mut values = Vec::new();
+    for row in rows {
+        values.push(row?);
+    }
+    Ok(values)
+}
+
+fn collect_tag_results(
+    conn: &Connection,
+    rows: impl Iterator<Item = Result<(i64, String, String)>>,
+) -> Result<Vec<TagResult>> {
+    let mut notes = Vec::new();
+    for row in rows {
+        let (note_id, note_path, note_title) = row?;
+        let tag_list = get_tags_for_note(conn, note_id)?;
+        notes.push(TagResult {
+            note_id,
+            note_path,
+            note_title,
+            tags: tag_list,
+        });
+    }
+    Ok(notes)
+}
+
 /// List all unique tags in the vault
 pub fn list_tags(conn: &Connection) -> Result<Vec<String>> {
     let mut stmt = conn.prepare("SELECT DISTINCT tag FROM tags ORDER BY tag")?;
 
     let results = stmt.query_map([], |row| row.get::<_, String>(0))?;
-
-    let mut tags = Vec::new();
-    for result in results {
-        tags.push(result?);
-    }
-
-    Ok(tags)
+    collect_string_column(results)
 }
 
 /// Get all notes that have a specific tag
@@ -54,21 +76,7 @@ pub fn get_notes_by_tag(conn: &Connection, tag: &str) -> Result<Vec<TagResult>> 
             row.get::<_, String>(2)?,
         ))
     })?;
-
-    let mut notes = Vec::new();
-    for note_row in note_rows {
-        let (note_id, note_path, note_title) = note_row?;
-
-        let tag_list = get_tags_for_note(conn, note_id)?;
-        notes.push(TagResult {
-            note_id,
-            note_path,
-            note_title,
-            tags: tag_list,
-        });
-    }
-
-    Ok(notes)
+    collect_tag_results(conn, note_rows)
 }
 
 /// Get all notes that have ALL of the specified tags (AND intersection)
@@ -97,24 +105,14 @@ pub fn get_notes_by_tags_and(conn: &Connection, tags: &[&str]) -> Result<Vec<Tag
 
     let params: Vec<&dyn rusqlite::ToSql> =
         tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
-    let mut results = stmt.query(params.as_slice())?;
-
-    let mut notes = Vec::new();
-    while let Some(row) = results.next()? {
-        let note_id: i64 = row.get(0)?;
-        let note_path: String = row.get(1)?;
-        let note_title: String = row.get(2)?;
-
-        let tag_list = get_tags_for_note(conn, note_id)?;
-        notes.push(TagResult {
-            note_id,
-            note_path,
-            note_title,
-            tags: tag_list,
-        });
-    }
-
-    Ok(notes)
+    let rows = stmt.query_map(params.as_slice(), |row| {
+        Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+        ))
+    })?;
+    collect_tag_results(conn, rows)
 }
 
 /// Get all notes that have ANY of the specified tags (OR union)
@@ -141,22 +139,12 @@ pub fn get_notes_by_tags_or(conn: &Connection, tags: &[&str]) -> Result<Vec<TagR
 
     let params: Vec<&dyn rusqlite::ToSql> =
         tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
-    let mut results = stmt.query(params.as_slice())?;
-
-    let mut notes = Vec::new();
-    while let Some(row) = results.next()? {
-        let note_id: i64 = row.get(0)?;
-        let note_path: String = row.get(1)?;
-        let note_title: String = row.get(2)?;
-
-        let tag_list = get_tags_for_note(conn, note_id)?;
-        notes.push(TagResult {
-            note_id,
-            note_path,
-            note_title,
-            tags: tag_list,
-        });
-    }
-
-    Ok(notes)
+    let rows = stmt.query_map(params.as_slice(), |row| {
+        Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+        ))
+    })?;
+    collect_tag_results(conn, rows)
 }

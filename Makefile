@@ -24,8 +24,14 @@ run:
 	cargo run
 
 coverage:
+	cargo test --no-run
 	mkdir -p target/cov
-	kcov --exclude-pattern=/.cargo,/usr/lib,target/ --skip-solibs target/cov cargo test
+	for file in target/debug/deps/*-*; do \
+		[ -x "$${file}" ] || continue; \
+		[ "$${file}" = "$${file%.d}" ] || continue; \
+		mkdir -p "target/cov/$$(basename $$file)"; \
+		kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$$(basename $$file)" "$$file" || true; \
+	done
 
 clean:
 	cargo clean

@@ -8,7 +8,7 @@ use tempfile::TempDir;
 fn test_config_from_file() -> Result<()> {
     let temp_dir = TempDir::new()?;
     let config_path = temp_dir.path().join("config.toml");
-    
+
     let config_content = r#"
 vault_path = "/tmp/test-vault"
 
@@ -21,15 +21,15 @@ default_limit = 30
 [graph]
 max_depth = 5
 "#;
-    
+
     fs::write(&config_path, config_content)?;
-    
+
     let config = Config::from_file(&config_path)?;
     assert_eq!(config.vault_path, PathBuf::from("/tmp/test-vault"));
     assert_eq!(config.exclude.patterns.len(), 2);
     assert_eq!(config.search.default_limit, 30);
     assert_eq!(config.graph.max_depth, 5);
-    
+
     Ok(())
 }
 
@@ -44,7 +44,7 @@ fn test_config_database_path_default() {
         graph: GraphConfig::default(),
         llm: None,
     };
-    
+
     let db_path = config.database_path();
     assert!(db_path.to_string_lossy().contains("obsidian-cli-inspector"));
     assert!(db_path.to_string_lossy().ends_with("index.db"));
@@ -62,7 +62,7 @@ fn test_config_database_path_custom() {
         graph: GraphConfig::default(),
         llm: None,
     };
-    
+
     let db_path = config.database_path();
     assert_eq!(db_path, custom_db);
 }
@@ -78,9 +78,11 @@ fn test_config_config_dir() {
         graph: GraphConfig::default(),
         llm: None,
     };
-    
+
     let config_dir = config.config_dir();
-    assert!(config_dir.to_string_lossy().ends_with("obsidian-cli-inspector"));
+    assert!(config_dir
+        .to_string_lossy()
+        .ends_with("obsidian-cli-inspector"));
 }
 
 #[test]
@@ -94,7 +96,7 @@ fn test_config_log_dir_default() {
         graph: GraphConfig::default(),
         llm: None,
     };
-    
+
     let log_dir = config.log_dir();
     assert!(log_dir.to_string_lossy().contains("obsidian-cli-inspector"));
     assert!(log_dir.to_string_lossy().ends_with("logs"));
@@ -112,7 +114,7 @@ fn test_config_log_dir_custom() {
         graph: GraphConfig::default(),
         llm: None,
     };
-    
+
     let log_dir = config.log_dir();
     assert_eq!(log_dir, custom_log);
 }
@@ -140,14 +142,14 @@ fn test_exclude_config_default() {
 fn test_exclude_config_from_toml() -> Result<()> {
     let temp_dir = TempDir::new()?;
     let config_path = temp_dir.path().join("config.toml");
-    
+
     // Test that default_exclude_patterns is used when patterns field is missing but exclude is present
     let config_content = r#"
 vault_path = "/tmp/test-vault"
 
 [exclude]
 "#;
-    
+
     fs::write(&config_path, config_content)?;
     let config = Config::from_file(&config_path)?;
     // When exclude section exists but patterns field is missing, serde default kicks in
@@ -155,7 +157,7 @@ vault_path = "/tmp/test-vault"
     assert!(config.exclude.patterns.contains(&".obsidian/".to_string()));
     assert!(config.exclude.patterns.contains(&".git/".to_string()));
     assert!(config.exclude.patterns.contains(&".trash/".to_string()));
-    
+
     Ok(())
 }
 
@@ -163,7 +165,7 @@ vault_path = "/tmp/test-vault"
 fn test_config_with_llm() -> Result<()> {
     let temp_dir = TempDir::new()?;
     let config_path = temp_dir.path().join("config.toml");
-    
+
     let config_content = r#"
 vault_path = "/tmp/test-vault"
 
@@ -172,17 +174,17 @@ api_url = "http://localhost:11434"
 model = "llama2"
 timeout_seconds = 60
 "#;
-    
+
     fs::write(&config_path, config_content)?;
-    
+
     let config = Config::from_file(&config_path)?;
     assert!(config.llm.is_some());
-    
+
     let llm = config.llm.unwrap();
     assert_eq!(llm.api_url, "http://localhost:11434");
     assert_eq!(llm.model, "llama2");
     assert_eq!(llm.timeout_seconds, 60);
-    
+
     Ok(())
 }
 
@@ -190,7 +192,7 @@ timeout_seconds = 60
 fn test_config_llm_default_timeout() -> Result<()> {
     let temp_dir = TempDir::new()?;
     let config_path = temp_dir.path().join("config.toml");
-    
+
     let config_content = r#"
 vault_path = "/tmp/test-vault"
 
@@ -198,14 +200,14 @@ vault_path = "/tmp/test-vault"
 api_url = "http://localhost:11434"
 model = "llama2"
 "#;
-    
+
     fs::write(&config_path, config_content)?;
-    
+
     let config = Config::from_file(&config_path)?;
     assert!(config.llm.is_some());
-    
+
     let llm = config.llm.unwrap();
     assert_eq!(llm.timeout_seconds, 30);
-    
+
     Ok(())
 }

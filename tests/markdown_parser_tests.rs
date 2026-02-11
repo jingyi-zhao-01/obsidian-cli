@@ -1,4 +1,4 @@
-use obsidian_cli_inspector::parser::{extract_markdown_links, build_markdown_link, LinkType};
+use obsidian_cli_inspector::parser::{build_markdown_link, extract_markdown_links, LinkType};
 
 #[test]
 fn test_extract_markdown_links_simple() {

@@ -23,7 +23,10 @@ fn test_normalize_note_identifier_trims_whitespace() {
 
 #[test]
 fn test_normalize_note_identifier_combined() {
-    assert_eq!(normalize_note_identifier("  ./folder\\note.md  "), "folder/note");
+    assert_eq!(
+        normalize_note_identifier("  ./folder\\note.md  "),
+        "folder/note"
+    );
 }
 
 #[test]

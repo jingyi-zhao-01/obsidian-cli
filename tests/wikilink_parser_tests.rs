@@ -79,7 +79,7 @@ fn test_extract_wikilinks_nested() {
     let content = "[[outer [[inner]]]]";
     let links = extract_wikilinks(content);
     // Should handle gracefully - behavior may vary
-    assert!(links.len() >= 1);
+    assert!(!links.is_empty());
 }
 
 #[test]

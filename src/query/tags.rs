@@ -48,6 +48,21 @@ fn collect_tag_results(
     Ok(notes)
 }
 
+fn map_note_row(row: &rusqlite::Row<'_>) -> Result<(i64, String, String)> {
+    Ok((
+        row.get::<_, i64>(0)?,
+        row.get::<_, String>(1)?,
+        row.get::<_, String>(2)?,
+    ))
+}
+
+fn comma_placeholders(count: usize) -> String {
+    std::iter::repeat("?")
+        .take(count)
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
 /// List all unique tags in the vault
 pub fn list_tags(conn: &Connection) -> Result<Vec<String>> {
     let mut stmt = conn.prepare("SELECT DISTINCT tag FROM tags ORDER BY tag")?;
@@ -69,13 +84,7 @@ pub fn get_notes_by_tag(conn: &Connection, tag: &str) -> Result<Vec<TagResult>> 
          ORDER BY n.path",
     )?;
 
-    let note_rows = stmt.query_map([tag], |row| {
-        Ok((
-            row.get::<_, i64>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, String>(2)?,
-        ))
-    })?;
+    let note_rows = stmt.query_map([tag], map_note_row)?;
     collect_tag_results(conn, note_rows)
 }
 
@@ -85,7 +94,7 @@ pub fn get_notes_by_tags_and(conn: &Connection, tags: &[&str]) -> Result<Vec<Tag
         return Ok(Vec::new());
     }
 
-    let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+    let placeholders = comma_placeholders(tags.len());
     let query = format!(
         "SELECT DISTINCT
             n.id,
@@ -105,13 +114,7 @@ pub fn get_notes_by_tags_and(conn: &Connection, tags: &[&str]) -> Result<Vec<Tag
 
     let params: Vec<&dyn rusqlite::ToSql> =
         tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
-    let rows = stmt.query_map(params.as_slice(), |row| {
-        Ok((
-            row.get::<_, i64>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, String>(2)?,
-        ))
-    })?;
+    let rows = stmt.query_map(params.as_slice(), map_note_row)?;
     collect_tag_results(conn, rows)
 }
 
@@ -121,7 +124,7 @@ pub fn get_notes_by_tags_or(conn: &Connection, tags: &[&str]) -> Result<Vec<TagR
         return Ok(Vec::new());
     }
 
-    let placeholders = tags.iter().map(|_| "?").collect::<Vec<_>>().join(",");
+    let placeholders = comma_placeholders(tags.len());
     let query = format!(
         "SELECT DISTINCT
             n.id,
@@ -139,12 +142,6 @@ pub fn get_notes_by_tags_or(conn: &Connection, tags: &[&str]) -> Result<Vec<TagR
 
     let params: Vec<&dyn rusqlite::ToSql> =
         tags.iter().map(|t| t as &dyn rusqlite::ToSql).collect();
-    let rows = stmt.query_map(params.as_slice(), |row| {
-        Ok((
-            row.get::<_, i64>(0)?,
-            row.get::<_, String>(1)?,
-            row.get::<_, String>(2)?,
-        ))
-    })?;
+    let rows = stmt.query_map(params.as_slice(), map_note_row)?;
     collect_tag_results(conn, rows)
 }

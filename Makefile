@@ -25,7 +25,7 @@ run:
 
 coverage:
 	mkdir -p target/cov
-	kcov --exclude-pattern=/.cargo,/usr/lib target/cov cargo test
+	kcov --exclude-pattern=/.cargo,/usr/lib,target/ --skip-solibs target/cov cargo test
 
 clean:
 	cargo clean

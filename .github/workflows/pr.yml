@@ -81,17 +81,8 @@ jobs:
           cd ../..
           rm -rf kcov-master master.tar.gz
 
-      - name: Build tests
-        run: cargo test --no-run
-
       - name: Generate coverage with kcov
-        run: |
-          for file in target/debug/deps/obsidian_cli_inspector-*; do
-            [ -x "${file}" ] || continue
-            [[ "${file}" == *.d ]] && continue
-            mkdir -p "target/cov/$(basename $file)"
-            kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"
-          done
+        run: make coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

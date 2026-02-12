@@ -11,7 +11,7 @@ use crate::scanner::VaultScanner;
 pub fn index_vault(
     config: &Config,
     dry_run: bool,
-    _force: bool,
+    force: bool,
     verbose: bool,
     logger: Option<&Logger>,
 ) -> Result<()> {
@@ -24,7 +24,7 @@ pub fn index_vault(
         );
     }
 
-    let db = Database::open(&db_path)
+    let mut db = Database::open(&db_path)
         .with_context(|| format!("Failed to open database: {}", db_path.display()))?;
 
     if verbose {
@@ -65,9 +65,37 @@ pub fn index_vault(
         return Ok(());
     }
 
+    let chunker = MarkdownChunker::default();
+    let tx = db
+        .transaction()
+        .context("Failed to start database transaction")?;
+
     // Index each file
     let mut indexed_count = 0;
+    let mut skipped_count = 0;
     for file in files {
+        let hash = format!("{:x}:{}", file.size, file.mtime);
+        let existing = tx
+            .get_note_metadata_by_path(&file.relative_path)
+            .context("Failed to look up note metadata")?;
+
+        if !force {
+            if let Some(meta) = &existing {
+                if meta.hash == hash {
+                    skipped_count += 1;
+                    if verbose {
+                        let msg = format!("Skipping unchanged: {}", file.relative_path);
+                        if let Some(log) = logger {
+                            let _ = log.print_and_log("index", &msg);
+                        } else {
+                            println!("{}", msg);
+                        }
+                    }
+                    continue;
+                }
+            }
+        }
+
         if verbose {
             let msg = format!("Indexing: {}", file.relative_path);
             if let Some(log) = logger {
@@ -84,11 +112,13 @@ pub fn index_vault(
         // Parse markdown
         let parsed = MarkdownParser::parse(&content);
 
-        // Compute hash (simple for now - just file size + mtime)
-        let hash = format!("{:x}:{}", file.size, file.mtime);
+        if let Some(meta) = existing {
+            tx.clear_note_data(meta.id)
+                .context("Failed to clear note data")?;
+        }
 
         // Insert note
-        let note_id = db
+        let note_id = tx
             .insert_note(&file.relative_path, &parsed.title, file.mtime, &hash, None)
             .context("Failed to insert note")?;
 
@@ -103,7 +133,7 @@ pub fn index_vault(
 
         // Insert tags
         for tag in &parsed.tags {
-            db.insert_tag(note_id, tag)
+            tx.insert_tag(note_id, tag)
                 .context("Failed to insert tag")?;
             if verbose {
                 let msg = format!("    • Tag: {}", tag);
@@ -117,7 +147,7 @@ pub fn index_vault(
 
         // Insert links
         for link in &parsed.links {
-            db.insert_link(
+            tx.insert_link(
                 note_id,
                 &link.text,
                 link.link_type.as_str(),
@@ -139,7 +169,6 @@ pub fn index_vault(
         }
 
         // Create chunker and split content into chunks
-        let chunker = MarkdownChunker::default();
         let chunks = chunker.chunk(&content);
 
         if verbose {
@@ -153,7 +182,7 @@ pub fn index_vault(
 
         // Insert chunks
         for chunk in chunks {
-            db.insert_chunk_with_offset(
+            tx.insert_chunk_with_offset(
                 note_id,
                 chunk.heading_path.as_deref(),
                 &chunk.text,
@@ -185,7 +214,16 @@ pub fn index_vault(
         indexed_count += 1;
     }
 
-    let msg = format!("Indexed {} notes successfully", indexed_count);
+    tx.commit().context("Failed to commit transaction")?;
+
+    let msg = if skipped_count > 0 {
+        format!(
+            "Indexed {} notes successfully (skipped {} unchanged)",
+            indexed_count, skipped_count
+        )
+    } else {
+        format!("Indexed {} notes successfully", indexed_count)
+    };
     if let Some(log) = logger {
         let _ = log.print_and_log("index", &msg);
     } else {

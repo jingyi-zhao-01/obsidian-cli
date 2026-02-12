@@ -69,13 +69,16 @@ tags-sanity: build-release
 
 
 
+init: 
+	cargo run -- --config test-config.toml init
+
 
 index:
 	cargo run -- --config test-config.toml index
 
 
-search: 
-    cargo run -- --config test-config.toml search "$(QUERY)"
+search:
+	cargo run -- --config test-config.toml search "$(QUERY)"
 
 
 

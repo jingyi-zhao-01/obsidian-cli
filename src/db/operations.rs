@@ -1,5 +1,7 @@
 use rusqlite::{Connection, OptionalExtension, Result};
 
+use super::NoteMetadata;
+
 pub fn insert_note(
     conn: &Connection,
     path: &str,
@@ -9,8 +11,14 @@ pub fn insert_note(
     frontmatter_json: Option<&str>,
 ) -> Result<i64> {
     conn.execute(
-        "INSERT OR REPLACE INTO notes (path, title, mtime, hash, frontmatter_json)
-         VALUES (?1, ?2, ?3, ?4, ?5)",
+        "INSERT INTO notes (path, title, mtime, hash, frontmatter_json)
+         VALUES (?1, ?2, ?3, ?4, ?5)
+         ON CONFLICT(path) DO UPDATE SET
+            title = excluded.title,
+            mtime = excluded.mtime,
+            hash = excluded.hash,
+            frontmatter_json = excluded.frontmatter_json,
+            updated_at = CURRENT_TIMESTAMP",
         rusqlite::params![path, title, mtime as i64, hash, frontmatter_json],
     )?;
 
@@ -25,6 +33,21 @@ pub fn get_note_by_path(conn: &Connection, path: &str) -> Result<Option<i64>> {
     conn.query_row("SELECT id FROM notes WHERE path = ?1", [path], |row| {
         row.get(0)
     })
+    .optional()
+}
+
+pub fn get_note_metadata_by_path(conn: &Connection, path: &str) -> Result<Option<NoteMetadata>> {
+    conn.query_row(
+        "SELECT id, mtime, hash FROM notes WHERE path = ?1",
+        [path],
+        |row| {
+            Ok(NoteMetadata {
+                id: row.get(0)?,
+                mtime: row.get(1)?,
+                hash: row.get(2)?,
+            })
+        },
+    )
     .optional()
 }
 

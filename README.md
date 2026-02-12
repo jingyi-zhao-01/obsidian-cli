@@ -3,10 +3,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-obsidian--cli-black?logo=github)](https://github.com/jingyi-zhao-01/obsidian-cli)
 [![Crates.io](https://img.shields.io/crates/v/obsidian-cli-inspector.svg)](https://crates.io/crates/obsidian-cli-inspector)
 [![Build](https://github.com/jingyi-zhao-01/obsidian-cli/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jingyi-zhao-01/obsidian-cli/actions/workflows/build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jingyi-zhao-01_obsidian-cli&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jingyi-zhao-01_obsidian-cli)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=jingyi-zhao-01_obsidian-cli&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=jingyi-zhao-01_obsidian-cli)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=jingyi-zhao-01_obsidian-cli&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=jingyi-zhao-01_obsidian-cli)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=jingyi-zhao-01_obsidian-cli&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=jingyi-zhao-01_obsidian-cli)
+[![codecov](https://codecov.io/gh/jingyi-zhao-01/obsidian-cli-inspector/branch/master/graph/badge.svg?token=4C0B7CEC8C)](https://codecov.io/gh/jingyi-zhao-01/obsidian-cli-inspector)
 
 
 A local-first, read-only CLI/TUI for inspecting and querying Obsidian vaults. It helps developers quickly find notes, links, and tags without leaving the terminal.

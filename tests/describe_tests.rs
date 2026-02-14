@@ -1,4 +1,70 @@
 
+
+// Test show_unimplemented
+#[test]
+fn test_show_unimplemented() {
+    use obsidian_cli_inspector::commands::other::show_unimplemented;
+    show_unimplemented("test", None);
+}
+
+// Test show_search
+#[test]
+fn test_show_search() {
+    use obsidian_cli_inspector::commands::other::show_search;
+    show_search("query", 10, None);
+}
+
+// Test show_backlinks
+#[test]
+fn test_show_backlinks() {
+    use obsidian_cli_inspector::commands::other::show_backlinks;
+    show_backlinks("note", None);
+}
+
+// Test show_links
+#[test]
+fn test_show_links() {
+    use obsidian_cli_inspector::commands::other::show_links;
+    show_links("note", None);
+}
+
+// Test show_tags
+#[test]
+fn test_show_tags() {
+    use obsidian_cli_inspector::commands::other::show_tags;
+    show_tags(&Some("tag".to_string()), false, None);
+    show_tags(&None, true, None);
+}
+
+// Test show_suggest
+#[test]
+fn test_show_suggest() {
+    use obsidian_cli_inspector::commands::other::show_suggest;
+    show_suggest("note", 5, None);
+}
+
+// Test show_bloat
+#[test]
+fn test_show_bloat() {
+    use obsidian_cli_inspector::commands::other::show_bloat;
+    show_bloat(1000, 10, None);
+}
+
+// Test show_tui
+#[test]
+fn test_show_tui() {
+    use obsidian_cli_inspector::commands::other::show_tui;
+    show_tui(None);
+}
+
+// Test show_graph
+#[test]
+fn test_show_graph() {
+    use obsidian_cli_inspector::commands::other::show_graph;
+    show_graph(&Some("note".to_string()), 2, None);
+    show_graph(&None, 1, None);
+}
+
 mod common;
 
 use anyhow::Result;

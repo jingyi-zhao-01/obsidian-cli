@@ -193,6 +193,40 @@ fn test_index_vault_verbose_force() -> Result<()> {
     Ok(())
 }
 
+
+// Test index vault with dry run
+#[test]
+fn test_index_dry_run() -> Result<()> {
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+
+    // Dry run - should not index files
+    index_vault(&config, true, false, true, None)?;
+
+    Ok(())
+}
+
+// Test index with logger  
+#[test]
+fn test_index_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir())?;
+    
+    // Index with logger
+    index_vault(&config, false, false, true, Some(&logger))?;
+
+    Ok(())
+}
+
 mod common;
 
 use anyhow::Result;

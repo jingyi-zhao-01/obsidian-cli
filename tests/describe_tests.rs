@@ -227,6 +227,67 @@ fn test_index_with_logger() -> Result<()> {
     Ok(())
 }
 
+
+// Test list_notes_by_tag with logger
+#[test]
+fn test_list_tags_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir())?;
+    
+    // Test tags with logger
+    list_notes_by_tag(&config, &None, true, Some(&logger))?;
+
+    Ok(())
+}
+
+// Test forward_links with logger
+#[test]
+fn test_forward_links_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir())?;
+    
+    // Test forward links with logger
+    get_forward_links(&config, "Productivity.md", Some(&logger))?;
+
+    Ok(())
+}
+
+// Test unresolved links with logger
+#[test]
+fn test_unresolved_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir())?;
+    
+    // Test unresolved links with logger
+    list_unresolved_links(&config, Some(&logger))?;
+
+    Ok(())
+}
+
 mod common;
 
 use anyhow::Result;

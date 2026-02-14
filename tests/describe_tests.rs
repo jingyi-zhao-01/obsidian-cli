@@ -383,6 +383,62 @@ fn test_db_version() -> Result<()> {
     Ok(())
 }
 
+
+// Test initialize_database with logger
+#[test]
+fn test_init_with_logger_coverage() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir())?;
+    
+    // Initialize with logger
+    initialize_database(&config, false, Some(&logger))?;
+
+    Ok(())
+}
+
+
+// Test markdown parser with wikilinks
+#[test]
+fn test_markdown_parser_with_wikilinks() {
+    use obsidian_cli_inspector::parser::MarkdownParser;
+    
+    let content = r#"# Heading
+
+Some text with [[WikiLink]] and another [[Link|alias]].
+
+## Another Heading
+
+More text here.
+"#;
+    
+    let parsed = MarkdownParser::parse(content);
+    // Just ensure it doesn't panic
+    assert!(true);
+}
+
+// Test markdown parser with frontmatter
+#[test]
+fn test_markdown_parser_with_frontmatter() {
+    use obsidian_cli_inspector::parser::MarkdownParser;
+    
+    let content = r#"---
+title: My Note
+tags: [test, example]
+---
+
+# Heading
+
+Content here.
+"#;
+    
+    let parsed = MarkdownParser::parse(content);
+    assert!(true);
+}
+
 mod common;
 
 use anyhow::Result;

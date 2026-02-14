@@ -280,4 +280,159 @@ Details here.
             .find(|c| c.heading_path.as_ref().is_some_and(|p| p.contains(" > ")));
         assert!(nested_chunk.is_some());
     }
+
+    #[test]
+    fn test_chunk_empty_content() {
+        let chunker = MarkdownChunker::default();
+        let chunks = chunker.chunk("");
+        assert!(chunks.is_empty());
+    }
+
+    #[test]
+    fn test_chunk_whitespace_only() {
+        let chunker = MarkdownChunker::default();
+        let chunks = chunker.chunk("   \n\n   \n   ");
+        assert!(chunks.is_empty());
+    }
+
+    #[test]
+    fn test_chunk_single_heading() {
+        let chunker = MarkdownChunker::default();
+        let content = "# Title\n\nContent here.";
+        let chunks = chunker.chunk(content);
+        assert!(!chunks.is_empty());
+        assert!(chunks[0].heading_path.is_some());
+    }
+
+    #[test]
+    fn test_chunk_large_section_paragraph_split() {
+        let chunker = MarkdownChunker::new(100, 20);
+        // Create content that will exceed max_chunk_size and need paragraph splitting
+        let content = r#"# Main
+
+This is a very long paragraph that should be split into multiple chunks when the chunker processes it. It contains many words and should exceed the maximum chunk size of 100 characters to trigger the paragraph-based splitting logic.
+
+Another paragraph here.
+"#;
+        let chunks = chunker.chunk(content);
+        assert!(chunks.len() > 1);
+    }
+
+    #[test]
+    fn test_build_heading_path_empty() {
+        let chunker = MarkdownChunker::default();
+        let path = chunker.build_heading_path(&[]);
+        assert!(path.is_none());
+    }
+
+    #[test]
+    fn test_build_heading_path_single() {
+        let chunker = MarkdownChunker::default();
+        let info = HeadingInfo {
+            level: 1,
+            text: "Title".to_string(),
+            byte_offset: 0,
+        };
+        let path = chunker.build_heading_path(&[info]);
+        assert!(path.is_some());
+        assert!(path.unwrap().contains("# Title"));
+    }
+
+    #[test]
+    fn test_update_heading_stack_new_level() {
+        let chunker = MarkdownChunker::default();
+        let mut stack: Vec<HeadingInfo> = Vec::new();
+        
+        let h1 = HeadingInfo {
+            level: 1,
+            text: "Main".to_string(),
+            byte_offset: 0,
+        };
+        chunker.update_heading_stack(&mut stack, h1, 0);
+        assert_eq!(stack.len(), 1);
+        
+        let h2 = HeadingInfo {
+            level: 2,
+            text: "Sub".to_string(),
+            byte_offset: 10,
+        };
+        chunker.update_heading_stack(&mut stack, h2, 10);
+        assert_eq!(stack.len(), 2);
+    }
+
+    #[test]
+    fn test_update_heading_stack_same_level() {
+        let chunker = MarkdownChunker::default();
+        let mut stack: Vec<HeadingInfo> = Vec::new();
+        
+        let h1 = HeadingInfo {
+            level: 1,
+            text: "Main".to_string(),
+            byte_offset: 0,
+        };
+        chunker.update_heading_stack(&mut stack, h1, 0);
+        
+        let h2 = HeadingInfo {
+            level: 1,
+            text: "Another".to_string(),
+            byte_offset: 10,
+        };
+        chunker.update_heading_stack(&mut stack, h2, 10);
+        assert_eq!(stack.len(), 1);
+        assert_eq!(stack[0].text, "Another");
+    }
+
+    #[test]
+    fn test_update_heading_stack_skip_level() {
+        let chunker = MarkdownChunker::default();
+        let mut stack: Vec<HeadingInfo> = Vec::new();
+        
+        let h1 = HeadingInfo {
+            level: 1,
+            text: "Main".to_string(),
+            byte_offset: 0,
+        };
+        chunker.update_heading_stack(&mut stack, h1, 0);
+        
+        let h3 = HeadingInfo {
+            level: 3,
+            text: "Detail".to_string(),
+            byte_offset: 10,
+        };
+        chunker.update_heading_stack(&mut stack, h3, 10);
+        // Should have h1 and h3 (h2 was skipped)
+        assert_eq!(stack.len(), 2);
+    }
+
+    #[test]
+    fn test_estimate_tokens_empty() {
+        let chunker = MarkdownChunker::default();
+        let tokens = chunker.estimate_tokens("");
+        assert_eq!(tokens, 0);
+    }
+
+    #[test]
+    fn test_estimate_tokens_long_text() {
+        let chunker = MarkdownChunker::default();
+        let text = "This is a longer piece of text that should have more tokens. It has many words and characters.";
+        let tokens = chunker.estimate_tokens(text);
+        assert!(tokens > 10);
+    }
+
+    #[test]
+    fn test_split_by_headings_no_headings() {
+        let chunker = MarkdownChunker::default();
+        let content = "Just some plain text without any headings.";
+        let sections = chunker.split_by_headings(content);
+        assert_eq!(sections.len(), 1);
+        assert!(sections[0].heading_path.is_none());
+    }
+
+    #[test]
+    fn test_split_by_headings_multiple() {
+        let chunker = MarkdownChunker::default();
+        let content = "# H1\n\nContent 1\n\n## H2\n\nContent 2\n";
+        let sections = chunker.split_by_headings(content);
+        assert!(sections.len() >= 1);
+    }
 }

@@ -108,3 +108,60 @@ impl Config {
             .unwrap_or_else(|| self.config_dir().join("logs"))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_default_search_limit() {
+        assert_eq!(super::default_search_limit(), 20);
+    }
+
+    #[test]
+    fn test_config_default_max_depth() {
+        assert_eq!(super::default_max_depth(), 3);
+    }
+
+    #[test]
+    fn test_config_default_timeout() {
+        assert_eq!(super::default_timeout(), 30);
+    }
+
+    #[test]
+    fn test_config_default_exclude_patterns() {
+        let patterns = super::default_exclude_patterns();
+        assert!(patterns.contains(&".obsidian/".to_string()));
+        assert!(patterns.contains(&".git/".to_string()));
+        assert!(patterns.contains(&".trash/".to_string()));
+    }
+
+    #[test]
+    fn test_config_struct_creation() {
+        let config = Config {
+            vault_path: PathBuf::from("/test/vault"),
+            database_path: Some(PathBuf::from("/test/db.db")),
+            log_path: Some(PathBuf::from("/test/logs")),
+            exclude: ExcludeConfig::default(),
+            search: SearchConfig::default(),
+            graph: GraphConfig::default(),
+            llm: None,
+        };
+        
+        assert_eq!(config.vault_path, PathBuf::from("/test/vault"));
+        assert!(config.database_path.is_some());
+        assert!(config.log_path.is_some());
+    }
+
+    #[test]
+    fn test_search_config_default_implementation() {
+        let search = SearchConfig::default();
+        assert_eq!(search.default_limit, 20);
+    }
+
+    #[test]
+    fn test_graph_config_default_implementation() {
+        let graph = GraphConfig::default();
+        assert_eq!(graph.max_depth, 3);
+    }
+}

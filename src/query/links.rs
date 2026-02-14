@@ -150,3 +150,41 @@ pub fn get_unresolved_links(conn: &Connection) -> Result<Vec<LinkResult>> {
 
     Ok(unresolved)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_link_result_creation() {
+        let link = LinkResult {
+            note_id: 1,
+            note_path: "test.md".to_string(),
+            note_title: "Test".to_string(),
+            is_embed: false,
+            alias: Some("alias".to_string()),
+            heading_ref: Some("heading".to_string()),
+            block_ref: Some("block".to_string()),
+        };
+        
+        assert_eq!(link.note_id, 1);
+        assert!(!link.is_embed);
+        assert!(link.alias.is_some());
+    }
+
+    #[test]
+    fn test_link_result_no_optionals() {
+        let link = LinkResult {
+            note_id: 1,
+            note_path: "test.md".to_string(),
+            note_title: "Test".to_string(),
+            is_embed: true,
+            alias: None,
+            heading_ref: None,
+            block_ref: None,
+        };
+        
+        assert!(link.is_embed);
+        assert!(link.alias.is_none());
+    }
+}

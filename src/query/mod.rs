@@ -78,3 +78,42 @@ pub fn get_note_by_filename(
         result
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_note_describe_result_creation() {
+        let note = NoteDescribeResult {
+            id: 1,
+            path: "test.md".to_string(),
+            title: "Test".to_string(),
+            mtime: 1234567890,
+            hash: "abc123".to_string(),
+            created_at: "2024-01-01".to_string(),
+            updated_at: "2024-01-02".to_string(),
+            frontmatter: Some("{}".to_string()),
+        };
+        
+        assert_eq!(note.id, 1);
+        assert_eq!(note.path, "test.md");
+        assert!(note.frontmatter.is_some());
+    }
+
+    #[test]
+    fn test_note_describe_result_no_frontmatter() {
+        let note = NoteDescribeResult {
+            id: 1,
+            path: "test.md".to_string(),
+            title: "Test".to_string(),
+            mtime: 1234567890,
+            hash: "abc123".to_string(),
+            created_at: "2024-01-01".to_string(),
+            updated_at: "2024-01-02".to_string(),
+            frontmatter: None,
+        };
+        
+        assert!(note.frontmatter.is_none());
+    }
+}

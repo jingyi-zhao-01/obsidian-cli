@@ -34,6 +34,27 @@ max_depth = 5
 }
 
 #[test]
+fn test_config_from_file_not_found() {
+    let config_path = PathBuf::from("/nonexistent/path/config.toml");
+    let result = Config::from_file(&config_path);
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_config_from_invalid_toml() -> Result<(), Box<dyn std::error::Error>> {
+    let temp_dir = TempDir::new()?;
+    let config_path = temp_dir.path().join("config.toml");
+    
+    // Invalid TOML content
+    fs::write(&config_path, "invalid toml [[[")?;
+    
+    let result = Config::from_file(&config_path);
+    assert!(result.is_err());
+    
+    Ok(())
+}
+
+#[test]
 fn test_config_database_path_default() {
     let config = Config {
         vault_path: PathBuf::from("/tmp/vault"),

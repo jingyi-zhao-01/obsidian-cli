@@ -109,6 +109,13 @@ fn main() -> Result<()> {
             show_graph(&note, depth, logger.as_ref());
             ("graph", Ok(()))
         }
+        Commands::Describe { filename } => {
+            let config = load_config(cli.config)?;
+            if let Some(ref log) = logger {
+                let _ = log.log_section("describe", "Starting Describe Command");
+            }
+            ("describe", get_note_describe(&config, &filename, logger.as_ref()))
+        }
     };
     let elapsed = start.elapsed();
     if result.is_ok() {

@@ -17,7 +17,7 @@ Commands
 - `obsidian-cli-inspector index` Index the vault (scan and parse all files)
 - `obsidian-cli-inspector search` Search notes using full-text search
 - `obsidian-cli-inspector backlinks` List backlinks to a note
-- `obsidian-cli-inspectorl links` List forward links from a note
+- `obsidian-cli-inspector links` List forward links from a note
 - `obsidian-cli-inspector unresolved-links` List all unresolved links in the vault
 - `obsidian-cli-inspector tags` List notes by tag
 - `obsidian-cli-inspector suggest` Suggest related notes not directly linked

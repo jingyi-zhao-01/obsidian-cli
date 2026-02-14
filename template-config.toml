@@ -1,0 +1,21 @@
+# Obsidian CLI Inspector configuration
+# Generated on first run - modify as needed
+
+# Required: path to your Obsidian vault
+vault_path = "/path/to/your/obsidian/vault"
+
+# Optional: override where the index database is stored
+# database_path = "~/.local/share/obsidian-cli-inspector/index.db"
+
+# Optional: override where logs are written
+# log_path = "~/.local/share/obsidian-cli-inspector/logs"
+
+[exclude]
+# Default patterns are: .obsidian/, .git/, .trash/
+# patterns = [".obsidian/", ".git/", ".trash/"]
+
+[search]
+# default_limit = 20
+
+[graph]
+# max_depth = 3

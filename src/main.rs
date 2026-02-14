@@ -121,28 +121,7 @@ fn main() -> Result<()> {
 }
 
 /// Default config template that will be seeded on first run
-const DEFAULT_CONFIG: &str = r#"# Obsidian CLI Inspector configuration
-# Generated on first run - modify as needed
-
-# Required: path to your Obsidian vault
-vault_path = "/path/to/your/obsidian/vault"
-
-# Optional: override where the index database is stored
-# database_path = "~/.local/share/obsidian-cli-inspector/index.db"
-
-# Optional: override where logs are written
-# log_path = "~/.local/share/obsidian-cli-inspector/logs"
-
-[exclude]
-# Default patterns are: .obsidian/, .git/, .trash/
-# patterns = [".obsidian/", ".git/", ".trash/"]
-
-[search]
-# default_limit = 20
-
-[graph]
-# max_depth = 3
-"#;
+const DEFAULT_CONFIG: &str = include_str!("../template-config.toml");
 
 fn ensure_config_exists(path: &PathBuf) -> Result<PathBuf> {
     if path.exists() {
@@ -178,4 +157,61 @@ fn load_config(config_path: Option<PathBuf>) -> Result<Config> {
     let config_file_path = ensure_config_exists(&path)?;
 
     Config::from_file(&config_file_path).context("Failed to load config file")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_default_config_includes_vault_path_placeholder() {
+        // Verify the template contains the vault_path placeholder
+        assert!(DEFAULT_CONFIG.contains("vault_path"));
+        assert!(DEFAULT_CONFIG.contains("\"/path/to/your/obsidian/vault\""));
+    }
+
+    #[test]
+    fn test_default_config_includes_all_sections() {
+        // Verify all expected config sections are present
+        assert!(DEFAULT_CONFIG.contains("[exclude]"));
+        assert!(DEFAULT_CONFIG.contains("[search]"));
+        assert!(DEFAULT_CONFIG.contains("[graph]"));
+    }
+
+    #[test]
+    fn test_ensure_config_returns_existing_path() {
+        // Create a temp directory with an existing config file
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("config.toml");
+        fs::write(&config_path, "vault_path = \"/test/vault\"").unwrap();
+
+        let result = ensure_config_exists(&config_path);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), config_path);
+    }
+
+    #[test]
+    fn test_ensure_config_creates_default_config() {
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("config.toml");
+
+        let result = ensure_config_exists(&config_path);
+        assert!(result.is_ok());
+        assert!(config_path.exists());
+
+        let content = fs::read_to_string(&config_path).unwrap();
+        assert!(content.contains("vault_path"));
+    }
+
+    #[test]
+    fn test_ensure_config_creates_parent_directories() {
+        let temp_dir = TempDir::new().unwrap();
+        let config_path = temp_dir.path().join("subdir").join("config.toml");
+
+        let result = ensure_config_exists(&config_path);
+        assert!(result.is_ok());
+        assert!(config_path.exists());
+    }
 }

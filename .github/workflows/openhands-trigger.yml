@@ -1,0 +1,103 @@
+name: OpenHands Agent Trigger
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, edited]
+
+jobs:
+  trigger-agent:
+    if: >
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@openhands-agent')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@openhands-agent'))
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract issue details
+        id: issue
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_BODY="${{ github.event.issue.body }}"
+          
+          # Sanitize title for branch name
+          BRANCH_NAME="openhands/issue-${ISSUE_NUMBER}-$(echo '$ISSUE_TITLE' | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-' | cut -c1-40)"
+          
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          echo "issue_title=$ISSUE_TITLE" >> $GITHUB_OUTPUT
+          echo "issue_body=$ISSUE_BODY" >> $GITHUB_OUTPUT
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Configure git
+        run: |
+          git config --local user.email "openhands-agent[bot]@users.noreply.github.com"
+          git config --local user.name "openhands Agent"
+
+      - name: Create work branch
+        run: |
+          BRANCH_NAME="${{ steps.issue.outputs.branch_name }}"
+          git checkout -b "$BRANCH_NAME" 2>/dev/null || git checkout -b "openhands/issue-${{ steps.issue.outputs.issue_number }}" && true
+          
+      - name: Create issue context file
+        run: |
+          cat > .openhands_issue.md << 'EOF'
+          # OpenHands Agent Work Item
+
+          ## Issue Details
+          - **Number:** ${{ github.event.issue.number }}
+          - **Title:** ${{ steps.issue.outputs.issue_title }}
+          - **URL:** ${{ github.event.issue.html_url }}
+
+          ## Description
+          ${{ steps.issue.outputs.issue_body }}
+
+          ## Status
+          - [ ] Analyze requirements
+          - [ ] Implement solution
+          - [ ] Create PR
+          EOF
+
+      - name: Commit and push branch
+        run: |
+          BRANCH_NAME="${{ steps.issue.outputs.branch_name }}"
+          git add .openhands_issue.md
+          git commit -m "Create work branch for issue #${{ steps.issue.outputs.issue_number }}"
+          git push -u origin "$BRANCH_NAME" --force
+
+      - name: Acknowledge mention
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.issue.number;
+            const repo = context.repo;
+            
+            // Add label
+            github.rest.issues.addLabels({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issueNumber,
+              labels: ['agent-work']
+            });
+            
+            // Comment with instructions
+            github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issueNumber,
+              body: `👋 @${context.actor} I've been tagged!\n\n` +
+                    `I've created a work branch \`${{ steps.issue.outputs.branch_name }}\` with the issue details.\n\n` +
+                    `**To have me work on this:**\n` +
+                    `1. Come to this chat and say: "work on issue #${issueNumber}"\n` +
+                    `2. I'll pick up the branch and implement the solution\n` +
+                    `3. I'll create a PR for you\n\n` +
+                    `Branch: \`${{ steps.issue.outputs.branch_name }}\``
+            });

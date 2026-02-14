@@ -81,6 +81,87 @@ fn test_show_stats() -> Result<()> {
     Ok(())
 }
 
+
+// Test search vault with logger
+#[test]
+fn test_search_vault_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir()).ok();
+    
+    // Test search with logger
+    search_vault(&config, "productivity", 10, logger.as_ref())?;
+
+    Ok(())
+}
+
+// Test get_backlinks with logger
+#[test]
+fn test_backlinks_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir()).ok();
+    
+    // Test backlinks with logger
+    get_backlinks(&config, "Productivity.md", logger.as_ref())?;
+
+    Ok(())
+}
+
+// Test show_stats with logger
+#[test]
+fn test_show_stats_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir()).ok();
+    
+    // Test stats with logger
+    show_stats(&config, logger.as_ref())?;
+
+    Ok(())
+}
+
+// Test get_note_describe with logger
+#[test]
+fn test_describe_with_logger() -> Result<()> {
+    use obsidian_cli_inspector::logger::Logger;
+    
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Create logger
+    let logger = Logger::new(config.log_dir()).ok();
+    
+    // Test describe with logger
+    get_note_describe(&config, "Home.md", logger.as_ref())?;
+
+    Ok(())
+}
+
 mod common;
 
 use anyhow::Result;

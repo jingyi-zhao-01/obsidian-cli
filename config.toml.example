@@ -1,0 +1,26 @@
+# Obsidian CLI Inspector configuration example
+
+# Required: path to your Obsidian vault
+vault_path = "/path/to/your/obsidian/vault"
+
+# Optional: override where the index database is stored
+# database_path = "/custom/path/index.db"
+
+# Optional: override where logs are written
+# log_path = "/custom/path/logs"
+
+[exclude]
+# Default patterns are: .obsidian/, .git/, .trash/
+# patterns = [".obsidian/", ".git/", ".trash/"]
+
+[search]
+# default_limit = 20
+
+[graph]
+# max_depth = 3
+
+# Optional LLM settings
+# [llm]
+# api_url = "https://example.com/v1/chat/completions"
+# model = "your-model-name"
+# timeout_seconds = 30

@@ -120,6 +120,52 @@ fn main() -> Result<()> {
     result
 }
 
+/// Default config template that will be seeded on first run
+const DEFAULT_CONFIG: &str = r#"# Obsidian CLI Inspector configuration
+# Generated on first run - modify as needed
+
+# Required: path to your Obsidian vault
+vault_path = "/path/to/your/obsidian/vault"
+
+# Optional: override where the index database is stored
+# database_path = "~/.local/share/obsidian-cli-inspector/index.db"
+
+# Optional: override where logs are written
+# log_path = "~/.local/share/obsidian-cli-inspector/logs"
+
+[exclude]
+# Default patterns are: .obsidian/, .git/, .trash/
+# patterns = [".obsidian/", ".git/", ".trash/"]
+
+[search]
+# default_limit = 20
+
+[graph]
+# max_depth = 3
+"#;
+
+fn ensure_config_exists(path: &PathBuf) -> Result<PathBuf> {
+    if path.exists() {
+        return Ok(path.clone());
+    }
+
+    // Create parent directories if they don't exist
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).context("Failed to create config directory")?;
+    }
+
+    // Write default config
+    std::fs::write(path, DEFAULT_CONFIG).context("Failed to write default config file")?;
+
+    println!(
+        "Created default config at: {}\n\
+         Please edit this file and set your vault_path.",
+        path.display()
+    );
+
+    Ok(path.clone())
+}
+
 fn load_config(config_path: Option<PathBuf>) -> Result<Config> {
     let path = config_path.unwrap_or_else(|| {
         let mut p = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
@@ -128,12 +174,8 @@ fn load_config(config_path: Option<PathBuf>) -> Result<Config> {
         p
     });
 
-    if !path.exists() {
-        anyhow::bail!(
-            "Config file not found at: {}\nCreate one using config.toml.example as template",
-            path.display()
-        );
-    }
+    // Ensure config file exists (create default if needed)
+    let config_file_path = ensure_config_exists(&path)?;
 
-    Config::from_file(&path).context("Failed to load config file")
+    Config::from_file(&config_file_path).context("Failed to load config file")
 }

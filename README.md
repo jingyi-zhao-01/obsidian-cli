@@ -1,5 +1,9 @@
 # Obsidian CLI Inspector
 
+
+- Note: THIS Feature currently is in beta
+
+
 [![GitHub](https://img.shields.io/badge/GitHub-obsidian--cli-black?logo=github)](https://github.com/jingyi-zhao-01/obsidian-cli)
 [![Crates.io](https://img.shields.io/crates/v/obsidian-cli-inspector.svg)](https://crates.io/crates/obsidian-cli-inspector)
 [![Build](https://github.com/jingyi-zhao-01/obsidian-cli/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/jingyi-zhao-01/obsidian-cli/actions/workflows/build.yml)

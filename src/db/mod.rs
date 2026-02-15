@@ -245,3 +245,93 @@ impl DatabaseQueryExecutor<'_> {
         f(self.conn)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_database_open() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+
+        let _db = Database::open(&db_path).unwrap();
+        assert!(db_path.exists());
+    }
+
+    #[test]
+    fn test_database_initialize() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+
+        let db = Database::open(&db_path).unwrap();
+        db.initialize(false).unwrap();
+
+        let version = db.get_version().unwrap();
+        assert_eq!(version, Some(1));
+    }
+
+    #[test]
+    fn test_database_initialize_force() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+
+        let db = Database::open(&db_path).unwrap();
+        db.initialize(false).unwrap();
+        let version1 = db.get_version().unwrap();
+
+        // Force reinitialize
+        db.initialize(true).unwrap();
+        let version2 = db.get_version().unwrap();
+
+        assert_eq!(version1, version2);
+    }
+
+    #[test]
+    fn test_database_transaction() {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+
+        let mut db = Database::open(&db_path).unwrap();
+        db.initialize(false).unwrap();
+
+        let tx = db.transaction().unwrap();
+        tx.commit().unwrap();
+    }
+
+    #[test]
+    fn test_note_metadata_creation() {
+        let metadata = NoteMetadata {
+            id: 1,
+            mtime: 1234567890,
+            hash: "abc123".to_string(),
+        };
+
+        assert_eq!(metadata.id, 1);
+        assert_eq!(metadata.mtime, 1234567890);
+        assert_eq!(metadata.hash, "abc123");
+    }
+
+    #[test]
+    fn test_database_stats_creation() {
+        let stats = DatabaseStats {
+            note_count: 10,
+            link_count: 20,
+            tag_count: 5,
+            chunk_count: 100,
+            unresolved_links: 2,
+        };
+
+        assert_eq!(stats.note_count, 10);
+        assert_eq!(stats.link_count, 20);
+        assert_eq!(stats.tag_count, 5);
+        assert_eq!(stats.chunk_count, 100);
+        assert_eq!(stats.unresolved_links, 2);
+    }
+
+    #[test]
+    fn test_schema_version_constant() {
+        assert_eq!(SCHEMA_VERSION, 1);
+    }
+}

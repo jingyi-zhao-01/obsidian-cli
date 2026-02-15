@@ -158,4 +158,10 @@ pub enum Commands {
         #[arg(short, long, default_value = "2")]
         depth: usize,
     },
+
+    /// Describe file metadata (without displaying paragraphs)
+    Describe {
+        /// File path or title to describe
+        filename: String,
+    },
 }

@@ -101,3 +101,18 @@ fn test_tags_case_sensitive() -> Result<()> {
 
     Ok(())
 }
+
+// Test tags without any arguments (should list all tags)
+#[test]
+fn test_tags_no_args() -> Result<()> {
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Setup
+    initialize_database(&config, false, None)?;
+    index_vault(&config, false, false, false, None)?;
+
+    // Test listing all tags with None and false (same as running `tags` without --all)
+    list_notes_by_tag(&config, &None, false, None)?;
+
+    Ok(())
+}

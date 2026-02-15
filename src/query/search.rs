@@ -49,3 +49,39 @@ pub fn search_chunks(conn: &Connection, query: &str, limit: usize) -> Result<Vec
 
     Ok(search_results)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_search_result_creation() {
+        let result = SearchResult {
+            chunk_id: 1,
+            note_id: 1,
+            note_path: "test.md".to_string(),
+            note_title: "Test".to_string(),
+            heading_path: Some("Heading".to_string()),
+            chunk_text: "Test content".to_string(),
+            rank: 1.0,
+        };
+
+        assert_eq!(result.chunk_id, 1);
+        assert!(result.heading_path.is_some());
+    }
+
+    #[test]
+    fn test_search_result_no_heading() {
+        let result = SearchResult {
+            chunk_id: 1,
+            note_id: 1,
+            note_path: "test.md".to_string(),
+            note_title: "Test".to_string(),
+            heading_path: None,
+            chunk_text: "Test content".to_string(),
+            rank: 1.0,
+        };
+
+        assert!(result.heading_path.is_none());
+    }
+}

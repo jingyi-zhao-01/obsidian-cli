@@ -145,3 +145,114 @@ pub fn get_notes_by_tags_or(conn: &Connection, tags: &[&str]) -> Result<Vec<TagR
     let rows = stmt.query_map(params.as_slice(), map_note_row)?;
     collect_tag_results(conn, rows)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rusqlite::Connection;
+
+    fn setup_test_db(conn: &Connection) {
+        conn.execute(
+            "CREATE TABLE notes (id INTEGER PRIMARY KEY, path TEXT, title TEXT)",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "CREATE TABLE tags (id INTEGER PRIMARY KEY, note_id INTEGER, tag TEXT)",
+            [],
+        )
+        .unwrap();
+
+        // Insert test notes
+        conn.execute(
+            "INSERT INTO notes (path, title) VALUES ('test1.md', 'Test 1')",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO notes (path, title) VALUES ('test2.md', 'Test 2')",
+            [],
+        )
+        .unwrap();
+
+        // Insert tags
+        conn.execute("INSERT INTO tags (note_id, tag) VALUES (1, 'tag1')", [])
+            .unwrap();
+        conn.execute("INSERT INTO tags (note_id, tag) VALUES (1, 'tag2')", [])
+            .unwrap();
+        conn.execute("INSERT INTO tags (note_id, tag) VALUES (2, 'tag1')", [])
+            .unwrap();
+    }
+
+    #[test]
+    fn test_comma_placeholders_single() {
+        let result = comma_placeholders(1);
+        assert_eq!(result, "?");
+    }
+
+    #[test]
+    fn test_comma_placeholders_multiple() {
+        let result = comma_placeholders(3);
+        assert_eq!(result, "?,?,?");
+    }
+
+    #[test]
+    fn test_comma_placeholders_empty() {
+        let result = comma_placeholders(0);
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_list_tags_with_data() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let tags = list_tags(&conn).unwrap();
+        assert!(tags.len() >= 2);
+    }
+
+    #[test]
+    fn test_get_notes_by_tag() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let notes = get_notes_by_tag(&conn, "tag1").unwrap();
+        assert_eq!(notes.len(), 2);
+    }
+
+    #[test]
+    fn test_get_notes_by_tags_and_with_results() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let notes = get_notes_by_tags_and(&conn, &["tag1", "tag2"]).unwrap();
+        assert_eq!(notes.len(), 1); // Only test1 has both tags
+    }
+
+    #[test]
+    fn test_get_notes_by_tags_and_empty() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let notes = get_notes_by_tags_and(&conn, &[]).unwrap();
+        assert!(notes.is_empty());
+    }
+
+    #[test]
+    fn test_get_notes_by_tags_or_with_results() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let notes = get_notes_by_tags_or(&conn, &["tag1", "tag2"]).unwrap();
+        assert_eq!(notes.len(), 2);
+    }
+
+    #[test]
+    fn test_get_notes_by_tags_or_empty() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_test_db(&conn);
+
+        let notes = get_notes_by_tags_or(&conn, &[]).unwrap();
+        assert!(notes.is_empty());
+    }
+}

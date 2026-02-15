@@ -5,60 +5,17 @@ on:
     branches:
       - master
 
+concurrency:
+  group: release-master
+  cancel-in-progress: false
+
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: 1.87.0
 
 jobs:
-  # Commented out: Binary builds not needed for crates.io publishing
-  # Uncomment if you want to create GitHub releases with pre-built binaries
-  # build:
-  #   name: Build Release Binaries
-  #   permissions:
-  #     contents: read
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - os: ubuntu-latest
-  #           target: x86_64-unknown-linux-gnu
-  #           artifact_name: obsidian-cli-inspector
-  #           asset_name: obsidian-cli-inspector-linux-x86_64
-  #         - os: ubuntu-latest
-  #           target: x86_64-unknown-linux-musl
-  #           artifact_name: obsidian-cli-inspector
-  #           asset_name: obsidian-cli-inspector-linux-x86_64-musl
-  #
-  #   runs-on: ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Setup Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         target: ${{ matrix.target }}
-  #         override: true
-  #
-  #     - name: Install musl tools (Linux musl only)
-  #       if: matrix.target == 'x86_64-unknown-linux-musl'
-  #       run: sudo apt-get update && sudo apt-get install -y musl-tools
-  #
-  #     - name: Build release binary
-  #       run: cargo build --release --target ${{ matrix.target }}
-  #
-  #     - name: Strip binary (Linux and macOS)
-  #       if: matrix.os != 'windows-latest'
-  #       run: strip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
-  #
-  #     - name: Upload binary artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: ${{ matrix.asset_name }}
-  #         path: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
-
   release:
-    name: Release
-    # needs: build  # Commented out since build job is disabled
+    name: Release to crates.io
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -67,65 +24,57 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create next version tag
+      - name: Fetch tags
+        run: git fetch --tags --force
+
+      # IMPORTANT: capture the previous tag BEFORE creating/pushing the new tag
+      - name: Determine previous tag
+        id: prev_tag
+        run: |
+          PREV_TAG="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          echo "PREV_TAG=${PREV_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create next version tag (creates + pushes)
         id: create_tag
         run: |
-          TAG_LINE=$(./cicd/generate_tag.sh)
-          TAG=${TAG_LINE#TAG=}
-          VERSION=${TAG#v}
+          TAG_LINE="$(./cicd/generate_tag.sh)"
+          TAG="${TAG_LINE#TAG=}"
+          VERSION="${TAG#v}"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Extract version from tag
-        id: get_version
-        run: |
-          echo "TAG=${{ steps.create_tag.outputs.TAG }}" >> $GITHUB_OUTPUT
-          echo "VERSION=${{ steps.create_tag.outputs.VERSION }}" >> $GITHUB_OUTPUT
-
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Install git-cliff
+        run: cargo install git-cliff --locked
+
+      - name: Generate semantic release notes (Conventional Commits)
+        id: release_notes
+        run: |
+          PREV="${{ steps.prev_tag.outputs.PREV_TAG }}"
+          TAG="${{ steps.create_tag.outputs.TAG }}"
+
+          if [ -z "$PREV" ]; then
+            git cliff --conventional --tag "$TAG" -o release_notes.md
+          else
+            git cliff --conventional "$PREV..HEAD" --tag "$TAG" -o release_notes.md
+          fi
+
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: cargo publish
 
-      # Commented out: Artifact download not needed without build job
-      # - name: Download all artifacts
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     path: ./artifacts
-      #
-      # - name: List and prepare artifacts
-      #   run: |
-      #     echo "Downloaded artifacts:"
-      #     ls -R ./artifacts
-      #     # Flatten the artifact directory structure
-      #     find ./artifacts -type f -exec mv {} ./artifacts/ \;
-      #     # Remove empty subdirectories
-      #     find ./artifacts -type d -empty -delete
-      #     echo "Flattened artifacts:"
-      #     ls -lh ./artifacts
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.create_tag.outputs.TAG }}
+          body_path: release_notes.md
 
-      - name: Generate release notes
-        id: release_notes
-        run: |
-          ./cicd/generate_release_notes.sh "${{ steps.get_version.outputs.VERSION }}" "${{ steps.get_version.outputs.TAG }}" > release_notes.md
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-          cat release_notes.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      # Commented out: GitHub release creation not needed without binaries
-      # - name: Create Release
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     tag_name: ${{ steps.get_version.outputs.TAG }}
-      #     body_path: release_notes.md
-      #     files: ./artifacts/*
-      #     draft: false
-      #     prerelease: false
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

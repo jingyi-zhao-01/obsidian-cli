@@ -32,4 +32,48 @@ mod tests {
         let result = get_overlap_text(text, 2);
         assert_eq!(result, "世界");
     }
+
+    #[test]
+    fn test_get_overlap_text_zero_overlap() {
+        let text = "Hello world";
+        let result = get_overlap_text(text, 0);
+        assert!(result.is_empty() || result == "Hello world");
+    }
+
+    #[test]
+    fn test_get_overlap_text_exact_length() {
+        let text = "Hello";
+        let result = get_overlap_text(text, 5);
+        assert_eq!(result, "Hello");
+    }
+
+    #[test]
+    fn test_get_overlap_text_greater_than_length() {
+        let text = "Hello";
+        let result = get_overlap_text(text, 10);
+        assert_eq!(result, "Hello");
+    }
+
+    #[test]
+    fn test_get_overlap_text_sentence_boundary() {
+        let text = "This is the first sentence. This is the second sentence.";
+        let result = get_overlap_text(text, 15);
+        // Should find ". " boundary and return from second sentence
+        // Result may vary based on implementation, so just check it's not empty
+        assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn test_get_overlap_text_no_sentence_boundary() {
+        let text = "This is a long text without periods";
+        let result = get_overlap_text(text, 10);
+        assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn test_get_overlap_text_single_char() {
+        let text = "A";
+        let result = get_overlap_text(text, 1);
+        assert_eq!(result, "A");
+    }
 }

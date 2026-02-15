@@ -113,4 +113,69 @@ mod tests {
         assert!(chunks.len() >= 2);
         assert!(chunks.iter().all(|chunk| chunk.byte_offset >= 100));
     }
+
+    #[test]
+    fn test_split_into_paragraphs_empty() {
+        let paragraphs = super::split_into_paragraphs("");
+        assert!(paragraphs.is_empty());
+    }
+
+    #[test]
+    fn test_split_into_paragraphs_single_para() {
+        let content = "This is a single paragraph.";
+        let paragraphs = super::split_into_paragraphs(content);
+        assert_eq!(paragraphs.len(), 1);
+    }
+
+    #[test]
+    fn test_split_into_paragraphs_multiple() {
+        let content = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph.";
+        let paragraphs = super::split_into_paragraphs(content);
+        assert_eq!(paragraphs.len(), 3);
+    }
+
+    #[test]
+    fn test_split_into_paragraphs_leading_trailing_whitespace() {
+        let content = "\n\nFirst paragraph.\n\nSecond paragraph.\n\n";
+        let paragraphs = super::split_into_paragraphs(content);
+        assert_eq!(paragraphs.len(), 2);
+    }
+
+    #[test]
+    fn test_chunk_by_paragraphs_empty() {
+        let chunks = chunk_by_paragraphs("", None, 0, 100, 10);
+        assert!(chunks.is_empty());
+    }
+
+    #[test]
+    fn test_chunk_by_paragraphs_small_para() {
+        let content = "Short paragraph.";
+        let chunks = chunk_by_paragraphs(content, Some("Heading"), 0, 100, 10);
+        assert_eq!(chunks.len(), 1);
+        assert_eq!(chunks[0].heading_path, Some("Heading".to_string()));
+    }
+
+    #[test]
+    fn test_chunk_by_paragraphs_large_para() {
+        // Create a paragraph larger than max_chunk_size
+        let content =
+            "This is a very long paragraph that should exceed the maximum chunk size. ".repeat(10);
+        let chunks = chunk_by_paragraphs(content.as_str(), None, 0, 50, 10);
+        // Should produce at least one chunk
+        assert!(!chunks.is_empty());
+    }
+
+    #[test]
+    fn test_estimate_tokens() {
+        let tokens = super::estimate_tokens("Hello world test");
+        // "Hello world test" = 17 chars / 4 = 4, word count = 3
+        // (4 + 3) / 2 = 3
+        assert!(tokens >= 3);
+    }
+
+    #[test]
+    fn test_estimate_tokens_empty() {
+        let tokens = super::estimate_tokens("");
+        assert_eq!(tokens, 0);
+    }
 }

@@ -56,3 +56,17 @@ fn test_index_vault_verbose() -> Result<()> {
 
     Ok(())
 }
+
+// Test init with force reinitialize
+#[test]
+fn test_init_force() -> Result<()> {
+    let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
+
+    // Initialize database
+    initialize_database(&config, false, None)?;
+
+    // Force reinitialize
+    initialize_database(&config, true, None)?;
+
+    Ok(())
+}

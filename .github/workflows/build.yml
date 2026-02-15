@@ -74,6 +74,25 @@ jobs:
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
           echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Update Cargo.toml version to match tag
+        run: |
+          VERSION="${{ steps.next_version.outputs.VERSION }}"
+          make set-version VERSION=$VERSION
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Cargo.toml Cargo.lock
+          git commit -m "chore: bump version to $VERSION"
+          git push
+
+      - name: Create and push git tag
+        id: create_tag
+        run: |
+          TAG="${{ steps.next_version.outputs.TAG }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:

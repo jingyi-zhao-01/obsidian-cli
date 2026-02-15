@@ -1,4 +1,4 @@
-.PHONY: build check test fmt fmt-check lint clippy run clean sanity build-release coverage
+.PHONY: build check test fmt fmt-check lint clippy run clean set-version sanity build-release coverage
 
 build:
 	cargo build
@@ -40,6 +40,16 @@ coverage:
 
 clean:
 	cargo clean
+
+set-version:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make set-version VERSION=1.2.3"; \
+		exit 1; \
+	fi
+	cargo install cargo-edit@0.12.3 --quiet --locked
+	cargo set-version $(VERSION)
+	cargo update --workspace
+	@echo "✅ Version set to $(VERSION) and Cargo.lock updated"
 
 	 
 

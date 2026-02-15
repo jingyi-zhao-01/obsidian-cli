@@ -64,7 +64,7 @@ fn test_init_force() -> Result<()> {
 
     // Initialize database
     initialize_database(&config, false, None)?;
-    
+
     // Force reinitialize
     initialize_database(&config, true, None)?;
 

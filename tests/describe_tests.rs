@@ -1,5 +1,3 @@
-
-
 // Test show_unimplemented
 #[test]
 fn test_show_unimplemented() {
@@ -65,7 +63,6 @@ fn test_show_graph() {
     show_graph(&None, 1, None);
 }
 
-
 // Test show_stats
 #[test]
 fn test_show_stats() -> Result<()> {
@@ -81,12 +78,11 @@ fn test_show_stats() -> Result<()> {
     Ok(())
 }
 
-
 // Test search vault with logger
 #[test]
 fn test_search_vault_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -95,7 +91,7 @@ fn test_search_vault_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir()).ok();
-    
+
     // Test search with logger
     search_vault(&config, "productivity", 10, logger.as_ref())?;
 
@@ -106,7 +102,7 @@ fn test_search_vault_with_logger() -> Result<()> {
 #[test]
 fn test_backlinks_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -115,7 +111,7 @@ fn test_backlinks_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir()).ok();
-    
+
     // Test backlinks with logger
     get_backlinks(&config, "Productivity.md", logger.as_ref())?;
 
@@ -126,7 +122,7 @@ fn test_backlinks_with_logger() -> Result<()> {
 #[test]
 fn test_show_stats_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -135,7 +131,7 @@ fn test_show_stats_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir()).ok();
-    
+
     // Test stats with logger
     show_stats(&config, logger.as_ref())?;
 
@@ -146,7 +142,7 @@ fn test_show_stats_with_logger() -> Result<()> {
 #[test]
 fn test_describe_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -155,13 +151,12 @@ fn test_describe_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir()).ok();
-    
+
     // Test describe with logger
     get_note_describe(&config, "Home.md", logger.as_ref())?;
 
     Ok(())
 }
-
 
 // Test index vault with verbose to test skip message
 #[test]
@@ -193,7 +188,6 @@ fn test_index_vault_verbose_force() -> Result<()> {
     Ok(())
 }
 
-
 // Test index vault with dry run
 #[test]
 fn test_index_dry_run() -> Result<()> {
@@ -208,11 +202,11 @@ fn test_index_dry_run() -> Result<()> {
     Ok(())
 }
 
-// Test index with logger  
+// Test index with logger
 #[test]
 fn test_index_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -220,19 +214,18 @@ fn test_index_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir())?;
-    
+
     // Index with logger
     index_vault(&config, false, false, true, Some(&logger))?;
 
     Ok(())
 }
 
-
 // Test list_notes_by_tag with logger
 #[test]
 fn test_list_tags_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -241,7 +234,7 @@ fn test_list_tags_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir())?;
-    
+
     // Test tags with logger
     list_notes_by_tag(&config, &None, true, Some(&logger))?;
 
@@ -252,7 +245,7 @@ fn test_list_tags_with_logger() -> Result<()> {
 #[test]
 fn test_forward_links_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -261,7 +254,7 @@ fn test_forward_links_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir())?;
-    
+
     // Test forward links with logger
     get_forward_links(&config, "Productivity.md", Some(&logger))?;
 
@@ -272,7 +265,7 @@ fn test_forward_links_with_logger() -> Result<()> {
 #[test]
 fn test_unresolved_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Setup
@@ -281,22 +274,21 @@ fn test_unresolved_with_logger() -> Result<()> {
 
     // Create logger
     let logger = Logger::new(config.log_dir())?;
-    
+
     // Test unresolved links with logger
     list_unresolved_links(&config, Some(&logger))?;
 
     Ok(())
 }
 
-
 // Test show functions with logger
 #[test]
 fn test_show_unimplemented_with_logger() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).ok();
-    
+
     use obsidian_cli_inspector::commands::other::show_unimplemented;
     show_unimplemented("test", logger.as_ref());
 }
@@ -305,10 +297,10 @@ fn test_show_unimplemented_with_logger() {
 #[test]
 fn test_show_search_with_logger() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).ok();
-    
+
     use obsidian_cli_inspector::commands::other::show_search;
     show_search("query", 10, logger.as_ref());
 }
@@ -317,10 +309,10 @@ fn test_show_search_with_logger() {
 #[test]
 fn test_show_tags_with_logger() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).ok();
-    
+
     use obsidian_cli_inspector::commands::other::show_tags;
     show_tags(&Some("tag".to_string()), false, logger.as_ref());
     show_tags(&None, true, logger.as_ref());
@@ -330,10 +322,10 @@ fn test_show_tags_with_logger() {
 #[test]
 fn test_show_graph_with_logger() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).ok();
-    
+
     use obsidian_cli_inspector::commands::other::show_graph;
     show_graph(&Some("note".to_string()), 2, logger.as_ref());
     show_graph(&None, 1, logger.as_ref());
@@ -343,14 +335,13 @@ fn test_show_graph_with_logger() {
 #[test]
 fn test_show_tui_with_logger() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).ok();
-    
+
     use obsidian_cli_inspector::commands::other::show_tui;
     show_tui(logger.as_ref());
 }
-
 
 // Test db transaction
 #[test]
@@ -359,11 +350,11 @@ fn test_db_transaction() -> Result<()> {
 
     // Setup
     initialize_database(&config, false, None)?;
-    
+
     // Open database and get transaction
     let mut db = obsidian_cli_inspector::db::Database::open(config.database_path())?;
     let _tx = db.transaction()?;
-    
+
     Ok(())
 }
 
@@ -374,38 +365,36 @@ fn test_db_version() -> Result<()> {
 
     // Setup
     initialize_database(&config, false, None)?;
-    
+
     // Open database and get version
     let db = obsidian_cli_inspector::db::Database::open(config.database_path())?;
     let version = db.get_version()?;
     assert!(version.is_some());
-    
+
     Ok(())
 }
-
 
 // Test initialize_database with logger
 #[test]
 fn test_init_with_logger_coverage() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Create logger
     let logger = Logger::new(config.log_dir())?;
-    
+
     // Initialize with logger
     initialize_database(&config, false, Some(&logger))?;
 
     Ok(())
 }
 
-
 // Test markdown parser with wikilinks
 #[test]
 fn test_markdown_parser_with_wikilinks() {
     use obsidian_cli_inspector::parser::MarkdownParser;
-    
+
     let content = r#"# Heading
 
 Some text with [[WikiLink]] and another [[Link|alias]].
@@ -414,17 +403,16 @@ Some text with [[WikiLink]] and another [[Link|alias]].
 
 More text here.
 "#;
-    
-    let parsed = MarkdownParser::parse(content);
+
+    let _parsed = MarkdownParser::parse(content);
     // Just ensure it doesn't panic
-    assert!(true);
 }
 
 // Test markdown parser with frontmatter
 #[test]
 fn test_markdown_parser_with_frontmatter() {
     use obsidian_cli_inspector::parser::MarkdownParser;
-    
+
     let content = r#"---
 title: My Note
 tags: [test, example]
@@ -434,20 +422,18 @@ tags: [test, example]
 
 Content here.
 "#;
-    
-    let parsed = MarkdownParser::parse(content);
-    assert!(true);
-}
 
+    let _parsed = MarkdownParser::parse(content);
+}
 
 // Test logger log_section
 #[test]
 fn test_logger_section() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).unwrap();
-    
+
     let result = logger.log_section("test", "Test Section");
     assert!(result.is_ok());
 }
@@ -456,10 +442,10 @@ fn test_logger_section() {
 #[test]
 fn test_logger_log() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).unwrap();
-    
+
     let result = logger.log("test", "Test message");
     assert!(result.is_ok());
 }
@@ -468,10 +454,10 @@ fn test_logger_log() {
 #[test]
 fn test_logger_print_and_log() {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let temp_dir = tempfile::tempdir().unwrap();
     let logger = Logger::new(temp_dir.path().to_path_buf()).unwrap();
-    
+
     let result = logger.print_and_log("test", "Test message");
     assert!(result.is_ok());
 }
@@ -480,12 +466,10 @@ fn test_logger_print_and_log() {
 #[test]
 fn test_config_from_file_not_found() {
     use obsidian_cli_inspector::config::Config;
-    
+
     let result = Config::from_file(&std::path::PathBuf::from("/nonexistent/path.toml"));
     assert!(result.is_err());
 }
-
-
 
 // Test list_notes_by_tag with specific tag
 #[test]
@@ -532,7 +516,6 @@ fn test_backlinks_none() -> Result<()> {
     Ok(())
 }
 
-
 // Test search with empty query
 #[test]
 fn test_search_empty_query() -> Result<()> {
@@ -552,7 +535,7 @@ fn test_search_empty_query() -> Result<()> {
 #[test]
 fn test_show_bloat_default() {
     use obsidian_cli_inspector::commands::other::show_bloat;
-    
+
     show_bloat(1000, 10, None);
 }
 
@@ -560,10 +543,9 @@ fn test_show_bloat_default() {
 #[test]
 fn test_show_suggest_with_limit() {
     use obsidian_cli_inspector::commands::other::show_suggest;
-    
+
     show_suggest("test", 5, None);
 }
-
 
 // Test forward links for non-existent note
 #[test]
@@ -595,7 +577,6 @@ fn test_describe_not_found() -> Result<()> {
     Ok(())
 }
 
-
 // Test list_notes_by_tag with empty result
 #[test]
 fn test_list_notes_by_tag_empty() -> Result<()> {
@@ -606,7 +587,12 @@ fn test_list_notes_by_tag_empty() -> Result<()> {
     index_vault(&config, false, false, false, None)?;
 
     // List tags with specific tag that doesn't exist
-    list_notes_by_tag(&config, &Some("nonexistent_tag_xyz".to_string()), false, None)?;
+    list_notes_by_tag(
+        &config,
+        &Some("nonexistent_tag_xyz".to_string()),
+        false,
+        None,
+    )?;
 
     Ok(())
 }
@@ -629,7 +615,7 @@ fn test_list_notes_by_tag_all_empty() -> Result<()> {
 #[test]
 fn test_show_tags_empty() {
     use obsidian_cli_inspector::commands::other::show_tags;
-    
+
     // Empty tags
     show_tags(&None, true, None);
 }
@@ -638,38 +624,36 @@ fn test_show_tags_empty() {
 #[test]
 fn test_show_bloat_empty() {
     use obsidian_cli_inspector::commands::other::show_bloat;
-    
+
     show_bloat(1000, 10, None);
 }
-
 
 // Test show_graph with note
 #[test]
 fn test_show_graph_with_note() {
     use obsidian_cli_inspector::commands::other::show_graph;
-    
+
     show_graph(&Some("Home".to_string()), 2, None);
 }
-
 
 // Test show_graph without note
 #[test]
 fn test_show_graph_without_note() {
     use obsidian_cli_inspector::commands::other::show_graph;
-    
+
     show_graph(&None, 1, None);
 }
-
 
 // Test show_links with logger
 #[test]
 fn test_show_links_with_logger() {
     use obsidian_cli_inspector::commands::other::show_links;
-    
-    let logger = obsidian_cli_inspector::logger::Logger::new(
-        std::path::PathBuf::from("/tmp/test_logger_links")
-    ).ok();
-    
+
+    let logger = obsidian_cli_inspector::logger::Logger::new(std::path::PathBuf::from(
+        "/tmp/test_logger_links",
+    ))
+    .ok();
+
     show_links("Home", logger.as_ref());
 }
 
@@ -677,11 +661,12 @@ fn test_show_links_with_logger() {
 #[test]
 fn test_show_backlinks_with_logger() {
     use obsidian_cli_inspector::commands::other::show_backlinks;
-    
-    let logger = obsidian_cli_inspector::logger::Logger::new(
-        std::path::PathBuf::from("/tmp/test_logger_backlinks")
-    ).ok();
-    
+
+    let logger = obsidian_cli_inspector::logger::Logger::new(std::path::PathBuf::from(
+        "/tmp/test_logger_backlinks",
+    ))
+    .ok();
+
     show_backlinks("Home", logger.as_ref());
 }
 
@@ -689,11 +674,12 @@ fn test_show_backlinks_with_logger() {
 #[test]
 fn test_show_search_with_results_and_logger() {
     use obsidian_cli_inspector::commands::other::show_search;
-    
-    let logger = obsidian_cli_inspector::logger::Logger::new(
-        std::path::PathBuf::from("/tmp/test_logger_search")
-    ).ok();
-    
+
+    let logger = obsidian_cli_inspector::logger::Logger::new(std::path::PathBuf::from(
+        "/tmp/test_logger_search",
+    ))
+    .ok();
+
     show_search("test query", 5, logger.as_ref());
 }
 
@@ -711,7 +697,6 @@ fn test_search_vault_custom_limit() -> Result<()> {
 
     Ok(())
 }
-
 
 // Test get_note_describe with partial match
 #[test]
@@ -753,9 +738,10 @@ fn test_describe_logger_new() -> Result<()> {
     index_vault(&config, false, false, false, None)?;
 
     // Create logger
-    let logger = obsidian_cli_inspector::logger::Logger::new(
-        std::path::PathBuf::from("/tmp/test_logger_describe")
-    ).ok();
+    let logger = obsidian_cli_inspector::logger::Logger::new(std::path::PathBuf::from(
+        "/tmp/test_logger_describe",
+    ))
+    .ok();
 
     // Describe with logger
     get_note_describe(&config, "Home.md", logger.as_ref())?;
@@ -773,16 +759,16 @@ fn test_unresolved_links_with_logger() -> Result<()> {
     index_vault(&config, false, false, false, None)?;
 
     // Create logger
-    let logger = obsidian_cli_inspector::logger::Logger::new(
-        std::path::PathBuf::from("/tmp/test_logger_unresolved")
-    ).ok();
+    let logger = obsidian_cli_inspector::logger::Logger::new(std::path::PathBuf::from(
+        "/tmp/test_logger_unresolved",
+    ))
+    .ok();
 
     // Get unresolved links with logger
     list_unresolved_links(&config, logger.as_ref())?;
 
     Ok(())
 }
-
 
 // Test index_vault with verbose
 #[test]
@@ -835,12 +821,12 @@ use obsidian_cli_inspector::commands::*;
 #[test]
 fn test_init_with_logger() -> Result<()> {
     use obsidian_cli_inspector::logger::Logger;
-    
+
     let (_vault_dir, _db_dir, config) = common::setup_test_config()?;
 
     // Create logger
     let logger = Logger::new(config.log_dir()).ok();
-    
+
     // Initialize with logger
     initialize_database(&config, false, logger.as_ref())?;
 
@@ -854,7 +840,7 @@ fn test_init_force_twice() -> Result<()> {
 
     // Initialize once
     initialize_database(&config, false, None)?;
-    
+
     // Force reinitialize
     initialize_database(&config, true, None)?;
 
@@ -868,7 +854,7 @@ fn test_init_new_directory() -> Result<()> {
 
     // Test init creates database
     initialize_database(&config, false, None)?;
-    
+
     // Check that db file exists
     let db_path = config.database_path();
     assert!(db_path.exists());
@@ -988,7 +974,7 @@ fn test_describe_empty_vault() -> Result<()> {
     initialize_database(&config, false, None)?;
 
     // Test describe on empty vault - should fail gracefully
-    let result = get_note_describe(&config, "Home.md", None);
+    let _result = get_note_describe(&config, "Home.md", None);
     // Result may be Ok or Err depending on whether note exists
     Ok(())
 }

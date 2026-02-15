@@ -160,16 +160,29 @@ mod tests {
         conn.execute(
             "CREATE TABLE notes (id INTEGER PRIMARY KEY, path TEXT, title TEXT)",
             [],
-        ).unwrap();
+        )
+        .unwrap();
         conn.execute(
             "CREATE TABLE links (id INTEGER PRIMARY KEY, src_note_id INTEGER, dst_note_id INTEGER, dst_text TEXT, is_embed INTEGER, alias TEXT, heading_ref TEXT, block_ref TEXT)",
             [],
         ).unwrap();
-        
+
         // Insert test notes
-        conn.execute("INSERT INTO notes (path, title) VALUES ('test1.md', 'Test 1')", []).unwrap();
-        conn.execute("INSERT INTO notes (path, title) VALUES ('test2.md', 'Test 2')", []).unwrap();
-        conn.execute("INSERT INTO notes (path, title) VALUES ('test3.md', 'Test 3')", []).unwrap();
+        conn.execute(
+            "INSERT INTO notes (path, title) VALUES ('test1.md', 'Test 1')",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO notes (path, title) VALUES ('test2.md', 'Test 2')",
+            [],
+        )
+        .unwrap();
+        conn.execute(
+            "INSERT INTO notes (path, title) VALUES ('test3.md', 'Test 3')",
+            [],
+        )
+        .unwrap();
     }
 
     #[test]
@@ -209,13 +222,13 @@ mod tests {
     fn test_get_backlinks_with_results() {
         let conn = Connection::open_in_memory().unwrap();
         setup_test_db(&conn);
-        
+
         // Insert a link from test1 to test2
         conn.execute(
             "INSERT INTO links (src_note_id, dst_note_id, dst_text, is_embed) VALUES (1, 2, 'test2.md', 0)",
             [],
         ).unwrap();
-        
+
         let backlinks = get_backlinks(&conn, "test2.md").unwrap();
         assert_eq!(backlinks.len(), 1);
         assert_eq!(backlinks[0].note_path, "test1.md");
@@ -225,7 +238,7 @@ mod tests {
     fn test_get_backlinks_no_results() {
         let conn = Connection::open_in_memory().unwrap();
         setup_test_db(&conn);
-        
+
         let backlinks = get_backlinks(&conn, "test2.md").unwrap();
         assert!(backlinks.is_empty());
     }
@@ -234,13 +247,13 @@ mod tests {
     fn test_get_forward_links_with_results() {
         let conn = Connection::open_in_memory().unwrap();
         setup_test_db(&conn);
-        
+
         // Insert a link from test1 to test2
         conn.execute(
             "INSERT INTO links (src_note_id, dst_note_id, dst_text, is_embed) VALUES (1, 2, 'test2.md', 0)",
             [],
         ).unwrap();
-        
+
         let forward_links = get_forward_links(&conn, "test1.md").unwrap();
         assert_eq!(forward_links.len(), 1);
     }
@@ -249,13 +262,13 @@ mod tests {
     fn test_get_forward_links_unresolved() {
         let conn = Connection::open_in_memory().unwrap();
         setup_test_db(&conn);
-        
+
         // Insert an unresolved link from test1 to nonexistent
         conn.execute(
             "INSERT INTO links (src_note_id, dst_note_id, dst_text, is_embed) VALUES (1, NULL, 'nonexistent.md', 0)",
             [],
         ).unwrap();
-        
+
         let forward_links = get_forward_links(&conn, "test1.md").unwrap();
         assert_eq!(forward_links.len(), 1);
         assert_eq!(forward_links[0].note_id, -1); // Unresolved
@@ -265,13 +278,13 @@ mod tests {
     fn test_get_unresolved_links() {
         let conn = Connection::open_in_memory().unwrap();
         setup_test_db(&conn);
-        
+
         // Insert an unresolved link
         conn.execute(
             "INSERT INTO links (src_note_id, dst_note_id, dst_text, is_embed) VALUES (1, NULL, 'nonexistent.md', 0)",
             [],
         ).unwrap();
-        
+
         let unresolved = get_unresolved_links(&conn).unwrap();
         assert_eq!(unresolved.len(), 1);
     }

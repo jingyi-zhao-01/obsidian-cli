@@ -37,13 +37,13 @@ jobs:
         uses: Swatinem/rust-cache@v2
       
       - name: Check formatting
-        run: rustfmt --edition 2021 --check $(git ls-files '*.rs')
+        run: make fmt-check
       
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: make clippy-check
       
       - name: Run tests
-        run: cargo test --all-features
+        run: make test
 
   codecov:
     name: Upload coverage reports to Codecov

@@ -53,7 +53,6 @@ pub fn search_chunks(conn: &Connection, query: &str, limit: usize) -> Result<Vec
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rusqlite::Connection;
 
     #[test]
     fn test_search_result_creation() {

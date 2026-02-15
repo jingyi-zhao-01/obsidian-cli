@@ -12,6 +12,8 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_TOOLCHAIN: 1.87.0
+  GIT_USER_NAME: jingyi-zhao-01
+  GIT_USER_EMAIL: zhao.elton@gmail.com
 
 jobs:
   release:
@@ -55,8 +57,8 @@ jobs:
           VERSION="${{ steps.next_version.outputs.VERSION }}"
           sed -i '/^\[package\]/,/^\[/s/^version = ".*"/version = "'$VERSION'"/' Cargo.toml
           
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "${{ env.GIT_USER_NAME }}"
+          git config user.email "${{ env.GIT_USER_EMAIL }}"
           
           if ! git diff --quiet Cargo.toml; then
             git add Cargo.toml

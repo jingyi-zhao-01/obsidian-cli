@@ -58,9 +58,9 @@ jobs:
           TAG="${{ steps.create_tag.outputs.TAG }}"
 
           if [ -z "$PREV" ]; then
-            git cliff -- --conventional --tag "$TAG" -o release_notes.md
+            git-cliff --tag "$TAG" -o release_notes.md
           else
-            git cliff -- --conventional "$PREV..HEAD" --tag "$TAG" -o release_notes.md
+            git-cliff "$PREV..HEAD" --tag "$TAG" -o release_notes.md
           fi
 
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT

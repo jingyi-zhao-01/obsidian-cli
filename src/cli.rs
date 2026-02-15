@@ -164,4 +164,18 @@ pub enum Commands {
         /// File path or title to describe
         filename: String,
     },
+
+    /// Diagnose orphan notes (no incoming + no outgoing links)
+    DiagnoseOrphans {
+        /// Exclude template notes
+        #[arg(long)]
+        exclude_templates: bool,
+
+        /// Exclude daily notes
+        #[arg(long)]
+        exclude_daily: bool,
+    },
+
+    /// Diagnose broken links (unresolved and ambiguous)
+    DiagnoseBrokenLinks,
 }

@@ -119,6 +119,32 @@ fn main() -> Result<()> {
                 get_note_describe(&config, &filename, logger.as_ref()),
             )
         }
+        Commands::DiagnoseOrphans {
+            exclude_templates,
+            exclude_daily,
+        } => {
+            let config = load_config(cli.config)?;
+            if let Some(ref log) = logger {
+                let _ = log.log_section("diagnose-orphans", "Starting Diagnose Orphans Command");
+            }
+            (
+                "diagnose-orphans",
+                diagnose_orphans(&config, exclude_templates, exclude_daily, logger.as_ref()),
+            )
+        }
+        Commands::DiagnoseBrokenLinks => {
+            let config = load_config(cli.config)?;
+            if let Some(ref log) = logger {
+                let _ = log.log_section(
+                    "diagnose-broken-links",
+                    "Starting Diagnose Broken Links Command",
+                );
+            }
+            (
+                "diagnose-broken-links",
+                diagnose_broken_links_cmd(&config, logger.as_ref()),
+            )
+        }
     };
     let elapsed = start.elapsed();
     if result.is_ok() {

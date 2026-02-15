@@ -93,6 +93,15 @@ index:
 search:
 	cargo run -- --config test-config.toml search "$(QUERY)"
 
+diagnose-orphans:
+	cargo run -- --config test-config.toml diagnose-orphans
+
+diagnose-orphans-with-flags:
+	cargo run -- --config test-config.toml diagnose-orphans --exclude-templates --exclude-daily
+
+diagnose-broken-links:
+	cargo run -- --config test-config.toml diagnose-broken-links
+
 
 
 

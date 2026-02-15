@@ -3,7 +3,10 @@ mod links;
 mod search;
 mod tags;
 
-pub use links::{get_backlinks, get_forward_links, get_unresolved_links, LinkResult};
+pub use links::{
+    diagnose_broken_links, get_backlinks, get_dead_ends, get_forward_links, get_orphans,
+    get_unresolved_links, BrokenLinkResult, DiagnoseResult, LinkResult,
+};
 pub use search::{search_chunks, SearchResult};
 pub use tags::{
     get_notes_by_tag, get_notes_by_tags_and, get_notes_by_tags_or, list_tags, TagResult,

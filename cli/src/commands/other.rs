@@ -1,9 +1,9 @@
+use anyhow::{Context, Result};
+use chrono;
 use obsidian_cli_core::config::Config;
 use obsidian_cli_core::db::Database;
 use obsidian_cli_core::logger::Logger;
 use obsidian_cli_core::query;
-use anyhow::{Context, Result};
-use chrono;
 
 /// Search vault using full-text search
 pub fn search_vault(

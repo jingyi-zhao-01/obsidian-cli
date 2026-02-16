@@ -1,25 +1,13 @@
 use anyhow::{Context, Result};
 use clap::Parser;
-use obsidian_cli_core::config::Config;
-use obsidian_cli_core::logger::Logger;
 use obsidian_cli::{
     cli_cmd::{Cli, Commands},
-    initialize_database,
-    show_stats,
-    index_vault,
-    search_vault,
-    get_backlinks,
-    get_forward_links,
-    list_unresolved_links,
-    list_notes_by_tag,
-    show_suggest,
-    show_bloat,
-    show_tui,
-    show_graph,
-    get_note_describe,
-    diagnose_orphans,
-    diagnose_broken_links_cmd,
+    diagnose_broken_links_cmd, diagnose_orphans, get_backlinks, get_forward_links,
+    get_note_describe, index_vault, initialize_database, list_notes_by_tag, list_unresolved_links,
+    search_vault, show_bloat, show_graph, show_stats, show_suggest, show_tui,
 };
+use obsidian_cli_core::config::Config;
+use obsidian_cli_core::logger::Logger;
 use std::path::PathBuf;
 use std::time::Instant;
 

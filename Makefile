@@ -23,10 +23,6 @@ lint: clippy
 clippy-check:
 	cargo clippy --all-targets --all-features -- -D warnings
 
-run:
-	cargo run
-
-
 
 coverage:
 	cargo test --no-run
@@ -53,6 +49,8 @@ set-version:
 
 	 
 
+
+# release sanity checks
 
 init-sanity: build-release
 	./target/release/obsidian-cli-inspector --config test-config.toml init
@@ -81,6 +79,9 @@ tags-sanity: build-release
 	./target/release/obsidian-cli-inspector --config test-config.toml tags --all
 
 
+
+
+# dev run
 
 init: 
 	cargo run -- --config test-config.toml init

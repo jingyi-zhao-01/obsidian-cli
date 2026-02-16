@@ -11,7 +11,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_TOOLCHAIN: 1.87.0
+  RUST_TOOLCHAIN: stable
   GIT_USER_NAME: jingyi-zhao-01
   GIT_USER_EMAIL: zhao.elton@gmail.com
 

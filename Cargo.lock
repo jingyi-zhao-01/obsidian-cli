@@ -434,7 +434,7 @@ dependencies = [
 
 [[package]]
 name = "obsidian-cli"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "anyhow",
  "chrono",
@@ -446,11 +446,11 @@ dependencies = [
 
 [[package]]
 name = "obsidian-cli-agent"
-version = "0.0.6"
+version = "0.0.7"
 
 [[package]]
 name = "obsidian-cli-core"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "anyhow",
  "chrono",

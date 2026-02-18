@@ -18,13 +18,19 @@ fn main() -> Result<()> {
 
     let start = Instant::now();
     let (command_name, result) = match cli.command {
-        Commands::Init { force } => command_handlers::run_init_command(cli.config, force),
+        Commands::Init { force } => command_handlers::run_init_command(cli.config.clone(), force),
         Commands::Stats => command_handlers::run_stats_command(&config, logger.as_ref()),
         Commands::Index {
             dry_run,
             force,
             verbose,
-        } => command_handlers::run_index_command(&config, dry_run, force, verbose, logger.as_ref()),
+        } => command_handlers::run_index_command(
+            &config,
+            dry_run,
+            force,
+            verbose,
+            logger.as_ref(),
+        ),
         Commands::Search { query, limit } => {
             command_handlers::run_search_command(&config, &query, limit, logger.as_ref())
         }

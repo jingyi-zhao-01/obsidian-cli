@@ -23,30 +23,31 @@ all:
 	@curl -sL "https://github.com/$(REPO_OWNER)/$(REPO_NAME)/archive/refs/tags/v$(VERSION).tar.gz" -o source.tar.gz || { echo "ERROR: Failed to fetch tarball"; rm -f source.tar.gz; exit 1; }
 	@SHA256=$$(sha256sum source.tar.gz | awk '{print $$1}') && \
 	  echo "Generating PKGBUILD..." && \
-	  cat > PKGBUILD <<'EOF' && \
-pkgname=$(PKGNAME)
-pkgver=$(VERSION)
-pkgrel=1
-pkgdesc="Local-first CLI/TUI for indexing and querying Obsidian vaults"
-arch=('x86_64')
-url="https://github.com/$(REPO_OWNER)/$(REPO_NAME)"
-license=('Apache')
-depends=()
-makedepends=('cargo')
-source=("$${pkgname}-$${pkgver}.tar.gz::https://github.com/$(REPO_OWNER)/$(REPO_NAME)/archive/refs/tags/v$${pkgver}.tar.gz")
-sha256sums=("$$SHA256")
-
-build() {
-  cd "$${srcdir}/$${pkgname}-$${pkgver}"
-  cargo build --release --locked
-}
-
-package() {
-  cd "$${srcdir}/$${pkgname}-$${pkgver}"
-  install -Dm755 target/release/$${pkgname} "$${pkgdir}/usr/bin/$${pkgname}"
-  install -Dm644 LICENSE "$${pkgdir}/usr/share/licenses/$${pkgname}/LICENSE"
-}
-EOF
+	  { \
+	    printf '%s\n' \
+	      'pkgname=$(PKGNAME)' \
+	      'pkgver=$(VERSION)' \
+	      'pkgrel=1' \
+	      'pkgdesc="Local-first CLI/TUI for indexing and querying Obsidian vaults"' \
+	      "arch=('x86_64')" \
+	      'url="https://github.com/$(REPO_OWNER)/$(REPO_NAME)"' \
+	      "license=('Apache')" \
+	      'depends=()' \
+	      "makedepends=('cargo')" \
+	      'source=("$${pkgname}-$${pkgver}.tar.gz::https://github.com/$(REPO_OWNER)/$(REPO_NAME)/archive/refs/tags/v$${pkgver}.tar.gz")' \
+	      "sha256sums=(\"$$SHA256\")" \
+	      '' \
+	      'build() {' \
+	      '  cd "$${srcdir}/$${pkgname}-$${pkgver}"' \
+	      '  cargo build --release --locked' \
+	      '}' \
+	      '' \
+	      'package() {' \
+	      '  cd "$${srcdir}/$${pkgname}-$${pkgver}"' \
+	      '  install -Dm755 target/release/$${pkgname} "$${pkgdir}/usr/bin/$${pkgname}"' \
+	      '  install -Dm644 LICENSE "$${pkgdir}/usr/share/licenses/$${pkgname}/LICENSE"' \
+	      '}'; \
+	  } > PKGBUILD
 	@rm -f source.tar.gz && \
 	  echo "Generating .SRCINFO..." && \
 	  makepkg --printsrcinfo > .SRCINFO && \

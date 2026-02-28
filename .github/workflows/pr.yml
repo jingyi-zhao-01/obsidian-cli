@@ -25,7 +25,7 @@ env:
 jobs:
   check:
     name: Lint, Format, and Test
-    runs-on: alpha
+    runs-on: self-hosted
     if: github.event.pull_request.draft == false
     permissions:
       contents: read
@@ -52,7 +52,7 @@ jobs:
 
   pr_tag:
     name: Update PR moving tag
-    runs-on: alpha
+    runs-on: self-hosted
     needs: check
     if: github.event.pull_request.draft == false
     permissions:
@@ -96,7 +96,7 @@ jobs:
 
   codecov:
     name: Upload coverage reports to Codecov
-    runs-on: alpha
+    runs-on: self-hosted
     needs: check
     if: github.event.pull_request.draft == false
     permissions:

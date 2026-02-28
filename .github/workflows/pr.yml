@@ -106,3 +106,77 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: target/cov/
           fail_ci_if_error: true
+  cargo-publish-dry-run:
+    name: Cargo Publish Dry Run
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.pull_request.draft == false
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Verify crate can be published
+        run: cargo publish --dry-run --locked
+
+  aur-dry-run:
+    name: AUR Build Dry Run
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.pull_request.draft == false
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Generate PKGBUILD
+        run: |
+          bash ./aur/genrate-pkgbuild.bash
+
+      - name: Verify PKGBUILD exists
+        run: |
+          test -f PKGBUILD || (echo "PKGBUILD not found" && exit 1)
+
+      - name: Generate .SRCINFO
+        run: |
+          docker run --rm -v "$PWD":/pkg archlinux:latest bash -c "
+            pacman -Syu --noconfirm base-devel git
+            cd /pkg
+            makepkg --printsrcinfo > .SRCINFO
+          "
+
+      - name: Validate PKGBUILD syntax
+        run: |
+          docker run --rm -v "$PWD":/pkg archlinux:latest bash -c "
+            pacman -Syu --noconfirm base-devel git
+            cd /pkg
+            makepkg --check
+          "
+
+      - name: Full clean Arch build
+        run: |
+          docker run --rm -v "$PWD":/pkg archlinux:latest bash -c "
+            set -e
+
+            pacman -Syu --noconfirm base-devel git rust cargo
+
+            useradd -m builduser
+            chown -R builduser:builduser /pkg
+
+            su builduser -c '
+              cd /pkg
+              makepkg -si --noconfirm --cleanbuild --clean
+            '
+          "

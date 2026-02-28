@@ -31,7 +31,7 @@ jobs:
           token : ${{ secrets.RELEASE_TOKEN }}
           release-type: rust
 
-  publish:
+  crate-publish:
     name: Publish to crates.io
     needs: release
     if: ${{ needs.release.outputs.release_created == 'true' }}
@@ -54,3 +54,26 @@ jobs:
 
       - name: Publish crate
         run: cargo publish --locked --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  aur-publish:
+    name: Publish to AUR
+    needs: release
+    if: ${{ needs.release.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Generate PKGBUILD
+        run: bash ./aur/genrate-pkgbuild.bash
+
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@<TAG>
+        with:
+          pkgname: my-awesome-package
+          pkgbuild: ./PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update AUR package
+          ssh_keyscan_types: rsa,ecdsa,ed25519
+

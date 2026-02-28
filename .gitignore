@@ -22,4 +22,5 @@ cobertura-coverage.xml
 _bmad
 _bmad-output
 .github/agents
-.vscode
+.vscode/
+.adrs/

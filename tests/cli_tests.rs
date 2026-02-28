@@ -181,6 +181,6 @@ fn test_cli_help_all_use_cases_covered() {
     ];
 
     for marker in &use_case_markers {
-        assert!(help_text.contains(marker), "Missing use case: {}", marker);
+        assert!(help_text.contains(marker), "Missing use case: {marker}");
     }
 }

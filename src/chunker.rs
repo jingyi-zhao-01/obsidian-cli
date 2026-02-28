@@ -88,7 +88,7 @@ impl MarkdownChunker {
         let mut current_offset = 0;
 
         for line in content.lines() {
-            let line_with_newline = format!("{}\n", line);
+            let line_with_newline = format!("{line}\n");
 
             if let Some(heading) = heading::parse_heading(line) {
                 // Save previous section if it has content

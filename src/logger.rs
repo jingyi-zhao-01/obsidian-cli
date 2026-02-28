@@ -16,7 +16,7 @@ impl Logger {
 
     pub fn get_log_file(&self, command: &str) -> PathBuf {
         let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-        self.log_path.join(format!("{}_{}.log", command, timestamp))
+        self.log_path.join(format!("{command}_{timestamp}.log"))
     }
 
     pub fn log(&self, command: &str, message: &str) -> Result<()> {
@@ -27,7 +27,7 @@ impl Logger {
             .open(&log_file)?;
 
         let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
-        writeln!(file, "[{}] {}", timestamp, message)?;
+        writeln!(file, "[{timestamp}] {message}")?;
 
         Ok(())
     }
@@ -40,13 +40,13 @@ impl Logger {
             .open(&log_file)?;
 
         let timestamp = chrono::Local::now().format("%Y-%m-%d %H:%M:%S%.3f");
-        writeln!(file, "\n[{}] === {} ===", timestamp, title)?;
+        writeln!(file, "\n[{timestamp}] === {title} ===")?;
 
         Ok(())
     }
 
     pub fn print_and_log(&self, command: &str, message: &str) -> Result<()> {
-        println!("{}", message);
+        println!("{message}");
         self.log(command, message)?;
         Ok(())
     }

@@ -33,7 +33,7 @@ pub fn show_stats(config: &Config, logger: Option<&Logger>) -> Result<()> {
         if let Some(log) = logger {
             let _ = log.print_and_log("stats", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 

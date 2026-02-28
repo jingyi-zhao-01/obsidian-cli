@@ -17,7 +17,7 @@ pub fn initialize_database(config: &Config, force: bool, logger: Option<&Logger>
     if let Some(log) = logger {
         let _ = log.print_and_log("init", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     let db = Database::open(&db_path)
@@ -27,14 +27,11 @@ pub fn initialize_database(config: &Config, force: bool, logger: Option<&Logger>
         .context("Failed to initialize database schema")?;
 
     let version = db.get_version()?.unwrap_or(0);
-    let msg = format!(
-        "Database initialized successfully (schema version: {})",
-        version
-    );
+    let msg = format!("Database initialized successfully (schema version: {version})");
     if let Some(log) = logger {
         let _ = log.print_and_log("init", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     Ok(())

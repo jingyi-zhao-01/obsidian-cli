@@ -132,10 +132,9 @@ pub fn get_notes_by_tags_or(conn: &Connection, tags: &[&str]) -> Result<Vec<TagR
             n.title
          FROM notes n
          WHERE n.id IN (
-             SELECT note_id FROM tags WHERE tag IN ({})
+             SELECT note_id FROM tags WHERE tag IN ({placeholders})
          )
-         ORDER BY n.path",
-        placeholders
+         ORDER BY n.path"
     );
 
     let mut stmt = conn.prepare(&query)?;

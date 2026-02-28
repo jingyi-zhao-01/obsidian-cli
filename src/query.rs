@@ -62,7 +62,7 @@ pub fn get_note_by_filename(
              FROM notes
              WHERE path LIKE ?1 OR title LIKE ?1
              LIMIT 1",
-            [format!("%{}%", filename)],
+            [format!("%{filename}%")],
             |row| {
                 Ok(NoteDescribeResult {
                     id: row.get(0)?,

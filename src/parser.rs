@@ -86,7 +86,7 @@ impl MarkdownParser {
                         for tag in tags_str.split(',') {
                             let clean_tag = tag.trim().trim_matches('"').trim_matches('\'');
                             if !clean_tag.is_empty() {
-                                map.insert(format!("tag_{}", clean_tag), clean_tag.to_string());
+                                map.insert(format!("tag_{clean_tag}"), clean_tag.to_string());
                             }
                         }
                     } else {

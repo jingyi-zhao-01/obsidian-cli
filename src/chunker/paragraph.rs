@@ -62,7 +62,7 @@ pub fn split_into_paragraphs(content: &str) -> Vec<(String, usize)> {
     let mut in_trailing_blanks = false;
 
     for line in content.lines() {
-        let line_with_newline = format!("{}\n", line);
+        let line_with_newline = format!("{line}\n");
 
         if line.trim().is_empty() {
             if !current_para.is_empty() {

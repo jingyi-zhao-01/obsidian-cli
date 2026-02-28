@@ -39,31 +39,30 @@ pub fn search_vault(
         .context("Failed to execute search")?;
 
     if results.is_empty() {
-        let msg = format!("No results found for: {}", query_str);
+        let msg = format!("No results found for: {query_str}");
         if let Some(log) = logger {
             let _ = log.print_and_log("search", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         return Ok(());
     }
 
     let msg = format!(
-        "Search Results for '{}' ({} results):",
-        query_str,
+        "Search Results for '{query_str}' ({} results):",
         results.len()
     );
     if let Some(log) = logger {
         let _ = log.print_and_log("search", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     for (idx, result) in results.iter().enumerate() {
         let heading_info = result
             .heading_path
             .as_ref()
-            .map(|h| format!(" [{}]", h))
+            .map(|h| format!(" [{h}]"))
             .unwrap_or_default();
         let msg = format!(
             "{}. {} ({}){}\n   {}",
@@ -83,7 +82,7 @@ pub fn search_vault(
         if let Some(log) = logger {
             let _ = log.print_and_log("search", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -110,11 +109,11 @@ pub fn get_backlinks(config: &Config, note: &str, logger: Option<&Logger>) -> Re
         .context("Failed to get backlinks")?;
 
     if backlinks.is_empty() {
-        let msg = format!("No backlinks found for: {}", note);
+        let msg = format!("No backlinks found for: {note}");
         if let Some(log) = logger {
             let _ = log.print_and_log("backlinks", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         return Ok(());
     }
@@ -123,7 +122,7 @@ pub fn get_backlinks(config: &Config, note: &str, logger: Option<&Logger>) -> Re
     if let Some(log) = logger {
         let _ = log.print_and_log("backlinks", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     for (idx, link) in backlinks.iter().enumerate() {
@@ -136,13 +135,13 @@ pub fn get_backlinks(config: &Config, note: &str, logger: Option<&Logger>) -> Re
             link_type,
             link.alias
                 .as_ref()
-                .map(|a| format!("(alias: {})", a))
+                .map(|a| format!("(alias: {a})"))
                 .unwrap_or_default()
         );
         if let Some(log) = logger {
             let _ = log.print_and_log("backlinks", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -169,11 +168,11 @@ pub fn get_forward_links(config: &Config, note: &str, logger: Option<&Logger>) -
         .context("Failed to get forward links")?;
 
     if forward_links.is_empty() {
-        let msg = format!("No forward links found for: {}", note);
+        let msg = format!("No forward links found for: {note}");
         if let Some(log) = logger {
             let _ = log.print_and_log("links", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         return Ok(());
     }
@@ -186,7 +185,7 @@ pub fn get_forward_links(config: &Config, note: &str, logger: Option<&Logger>) -
     if let Some(log) = logger {
         let _ = log.print_and_log("links", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     for (idx, link) in forward_links.iter().enumerate() {
@@ -205,7 +204,7 @@ pub fn get_forward_links(config: &Config, note: &str, logger: Option<&Logger>) -
         if let Some(log) = logger {
             let _ = log.print_and_log("links", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -236,7 +235,7 @@ pub fn list_unresolved_links(config: &Config, logger: Option<&Logger>) -> Result
         if let Some(log) = logger {
             let _ = log.print_and_log("unresolved-links", msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         return Ok(());
     }
@@ -245,7 +244,7 @@ pub fn list_unresolved_links(config: &Config, logger: Option<&Logger>) -> Result
     if let Some(log) = logger {
         let _ = log.print_and_log("unresolved-links", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     for (idx, link) in unresolved.iter().enumerate() {
@@ -259,7 +258,7 @@ pub fn list_unresolved_links(config: &Config, logger: Option<&Logger>) -> Result
         if let Some(log) = logger {
             let _ = log.print_and_log("unresolved-links", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -297,7 +296,7 @@ pub fn list_notes_by_tag(
             if let Some(log) = logger {
                 let _ = log.print_and_log("tags", msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
             return Ok(());
         }
@@ -306,7 +305,7 @@ pub fn list_notes_by_tag(
         if let Some(log) = logger {
             let _ = log.print_and_log("tags", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
 
         for (idx, tag_name) in all_tags.iter().enumerate() {
@@ -314,7 +313,7 @@ pub fn list_notes_by_tag(
             if let Some(log) = logger {
                 let _ = log.print_and_log("tags", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
         }
     } else if let Some(tag_name) = tag {
@@ -325,11 +324,11 @@ pub fn list_notes_by_tag(
             .context("Failed to get notes by tag")?;
 
         if notes.is_empty() {
-            let msg = format!("No notes found with tag: {}", tag_name);
+            let msg = format!("No notes found with tag: {tag_name}");
             if let Some(log) = logger {
                 let _ = log.print_and_log("tags", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
             return Ok(());
         }
@@ -338,7 +337,7 @@ pub fn list_notes_by_tag(
         if let Some(log) = logger {
             let _ = log.print_and_log("tags", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
 
         for (idx, note) in notes.iter().enumerate() {
@@ -352,7 +351,7 @@ pub fn list_notes_by_tag(
             if let Some(log) = logger {
                 let _ = log.print_and_log("tags", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
         }
     }
@@ -362,79 +361,79 @@ pub fn list_notes_by_tag(
 
 /// Show placeholder for unimplemented commands
 pub fn show_unimplemented(command: &str, logger: Option<&Logger>) {
-    let msg = format!("{} command not yet implemented", command);
+    let msg = format!("{command}() command not yet implemented");
     if let Some(log) = logger {
         let _ = log.print_and_log(command, &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 }
 
 pub fn show_search(query: &str, limit: usize, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("search", "Search command not yet implemented");
-        let _ = log.print_and_log("search", &format!("  query: {}", query));
-        let _ = log.print_and_log("search", &format!("  limit: {}", limit));
+        let _ = log.print_and_log("search", &format!("  query: {query}"));
+        let _ = log.print_and_log("search", &format!("  limit: {limit}"));
     } else {
         println!("Search command not yet implemented");
-        println!("  query: {}", query);
-        println!("  limit: {}", limit);
+        println!("  query: {query}");
+        println!("  limit: {limit}");
     }
 }
 
 pub fn show_backlinks(note: &str, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("backlinks", "Backlinks command not yet implemented");
-        let _ = log.print_and_log("backlinks", &format!("  note: {}", note));
+        let _ = log.print_and_log("backlinks", &format!("  note: {note}"));
     } else {
         println!("Backlinks command not yet implemented");
-        println!("  note: {}", note);
+        println!("  note: {note}");
     }
 }
 
 pub fn show_links(note: &str, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("links", "Links command not yet implemented");
-        let _ = log.print_and_log("links", &format!("  note: {}", note));
+        let _ = log.print_and_log("links", &format!("  note: {note}"));
     } else {
         println!("Links command not yet implemented");
-        println!("  note: {}", note);
+        println!("  note: {note}");
     }
 }
 
 pub fn show_tags(tag: &Option<String>, all: bool, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("tags", "Tags command not yet implemented");
-        let _ = log.print_and_log("tags", &format!("  tag: {:?}", tag));
-        let _ = log.print_and_log("tags", &format!("  all: {}", all));
+        let _ = log.print_and_log("tags", &format!("  tag: {tag:?}"));
+        let _ = log.print_and_log("tags", &format!("  all: {all}"));
     } else {
         println!("Tags command not yet implemented");
-        println!("  tag: {:?}", tag);
-        println!("  all: {}", all);
+        println!("  tag: {tag:?}");
+        println!("  all: {all}");
     }
 }
 
 pub fn show_suggest(note: &str, limit: usize, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("suggest", "Suggest command not yet implemented");
-        let _ = log.print_and_log("suggest", &format!("  note: {}", note));
-        let _ = log.print_and_log("suggest", &format!("  limit: {}", limit));
+        let _ = log.print_and_log("suggest", &format!("  note: {note}"));
+        let _ = log.print_and_log("suggest", &format!("  limit: {limit}"));
     } else {
         println!("Suggest command not yet implemented");
-        println!("  note: {}", note);
-        println!("  limit: {}", limit);
+        println!("  note: {note}");
+        println!("  limit: {limit}");
     }
 }
 
 pub fn show_bloat(threshold: usize, limit: usize, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("bloat", "Bloat command not yet implemented");
-        let _ = log.print_and_log("bloat", &format!("  threshold: {}", threshold));
-        let _ = log.print_and_log("bloat", &format!("  limit: {}", limit));
+        let _ = log.print_and_log("bloat", &format!("  threshold: {threshold}"));
+        let _ = log.print_and_log("bloat", &format!("  limit: {limit}"));
     } else {
         println!("Bloat command not yet implemented");
-        println!("  threshold: {}", threshold);
-        println!("  limit: {}", limit);
+        println!("  threshold: {threshold}");
+        println!("  limit: {limit}");
     }
 }
 
@@ -449,12 +448,12 @@ pub fn show_tui(logger: Option<&Logger>) {
 pub fn show_graph(note: &Option<String>, depth: usize, logger: Option<&Logger>) {
     if let Some(log) = logger {
         let _ = log.print_and_log("graph", "Graph command not yet implemented");
-        let _ = log.print_and_log("graph", &format!("  note: {:?}", note));
-        let _ = log.print_and_log("graph", &format!("  depth: {}", depth));
+        let _ = log.print_and_log("graph", &format!("  note: {note:?}"));
+        let _ = log.print_and_log("graph", &format!("  depth: {depth}"));
     } else {
         println!("Graph command not yet implemented");
-        println!("  note: {:?}", note);
-        println!("  depth: {}", depth);
+        println!("  note: {note:?}");
+        println!("  depth: {depth}");
     }
 }
 
@@ -489,25 +488,25 @@ pub fn get_note_describe(config: &Config, filename: &str, logger: Option<&Logger
             println!("ID:          {}", note.id);
             println!("Title:       {}", note.title);
             println!("Path:        {}", note.path);
-            println!("Modified:    {}", mtime);
+            println!("Modified:    {mtime}");
             println!("Hash:        {}", note.hash);
             println!("Created:     {}", note.created_at);
             println!("Updated:     {}", note.updated_at);
 
             if let Some(frontmatter) = note.frontmatter {
                 if !frontmatter.is_empty() {
-                    println!("Frontmatter: {}", frontmatter);
+                    println!("Frontmatter: {frontmatter}");
                 }
             }
 
             Ok(())
         }
         None => {
-            let msg = format!("Note not found: {}", filename);
+            let msg = format!("Note not found: {filename}");
             if let Some(log) = logger {
                 let _ = log.print_and_log("describe", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
             Ok(())
         }

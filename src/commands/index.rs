@@ -32,13 +32,13 @@ pub fn index_vault(
         if let Some(log) = logger {
             let _ = log.print_and_log("index", msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         let msg = format!("Vault path: {}", config.vault_path.display());
         if let Some(log) = logger {
             let _ = log.print_and_log("index", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -51,7 +51,7 @@ pub fn index_vault(
         if let Some(log) = logger {
             let _ = log.print_and_log("index", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
     }
 
@@ -60,7 +60,7 @@ pub fn index_vault(
         if let Some(log) = logger {
             let _ = log.print_and_log("index", &msg);
         } else {
-            println!("{}", msg);
+            println!("{msg}");
         }
         return Ok(());
     }
@@ -88,7 +88,7 @@ pub fn index_vault(
                         if let Some(log) = logger {
                             let _ = log.print_and_log("index", &msg);
                         } else {
-                            println!("{}", msg);
+                            println!("{msg}");
                         }
                     }
                     continue;
@@ -101,7 +101,7 @@ pub fn index_vault(
             if let Some(log) = logger {
                 let _ = log.print_and_log("index", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
         }
 
@@ -127,7 +127,7 @@ pub fn index_vault(
             if let Some(log) = logger {
                 let _ = log.print_and_log("index", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
         }
 
@@ -136,11 +136,11 @@ pub fn index_vault(
             tx.insert_tag(note_id, tag)
                 .context("Failed to insert tag")?;
             if verbose {
-                let msg = format!("    • Tag: {}", tag);
+                let msg = format!("    • Tag: {tag}");
                 if let Some(log) = logger {
                     let _ = log.print_and_log("index", &msg);
                 } else {
-                    println!("{}", msg);
+                    println!("{msg}");
                 }
             }
         }
@@ -163,7 +163,7 @@ pub fn index_vault(
                 if let Some(log) = logger {
                     let _ = log.print_and_log("index", &msg);
                 } else {
-                    println!("{}", msg);
+                    println!("{msg}");
                 }
             }
         }
@@ -176,7 +176,7 @@ pub fn index_vault(
             if let Some(log) = logger {
                 let _ = log.print_and_log("index", &msg);
             } else {
-                println!("{}", msg);
+                println!("{msg}");
             }
         }
 
@@ -195,7 +195,7 @@ pub fn index_vault(
                 let heading_info = chunk
                     .heading_path
                     .as_ref()
-                    .map(|h| format!(" [{}]", h))
+                    .map(|h| format!(" [{h}]"))
                     .unwrap_or_default();
                 let msg = format!(
                     "      - Chunk: {} chars, ~{} tokens{}",
@@ -206,7 +206,7 @@ pub fn index_vault(
                 if let Some(log) = logger {
                     let _ = log.print_and_log("index", &msg);
                 } else {
-                    println!("{}", msg);
+                    println!("{msg}");
                 }
             }
         }
@@ -217,17 +217,14 @@ pub fn index_vault(
     tx.commit().context("Failed to commit transaction")?;
 
     let msg = if skipped_count > 0 {
-        format!(
-            "Indexed {} notes successfully (skipped {} unchanged)",
-            indexed_count, skipped_count
-        )
+        format!("Indexed {indexed_count} notes successfully (skipped {skipped_count} unchanged)")
     } else {
-        format!("Indexed {} notes successfully", indexed_count)
+        format!("Indexed {indexed_count} notes successfully")
     };
     if let Some(log) = logger {
         let _ = log.print_and_log("index", &msg);
     } else {
-        println!("{}", msg);
+        println!("{msg}");
     }
 
     Ok(())

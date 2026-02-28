@@ -2,5 +2,10 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "jzhao62",
         "projectKey": "jingyi-zhao-01_obsidian-cli"
-    }
+    },
+    "editor.formatOnSave": true,
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+    },
+    "rust-analyzer.check.command": "clippy"
 }

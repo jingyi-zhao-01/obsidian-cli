@@ -31,7 +31,10 @@ fn main() -> Result<()> {
                 let _ = log.log_section("init", "Starting Init Command");
             }
 
-            ("init", initialize_database(&config, force, cmd_logger.as_ref()))
+            (
+                "init",
+                initialize_database(&config, force, cmd_logger.as_ref()),
+            )
         }
         Commands::Stats => {
             let config = load_config(cli.config)?;
@@ -153,9 +156,9 @@ fn main() -> Result<()> {
     };
     let elapsed = start.elapsed();
     if result.is_ok() {
-        println!("Command '{}' completed in {:.2?}", command_name, elapsed);
+        println!("Command '{command_name}' completed in {elapsed:.2?}");
     } else {
-        eprintln!("Command '{}' failed after {:.2?}", command_name, elapsed);
+        eprintln!("Command '{command_name}' failed after {elapsed:.2?}");
     }
 
     result
@@ -209,7 +212,7 @@ fn interactive_config_setup(config_path: Option<PathBuf>) -> Result<Config> {
 
     // 1) Vault path (required)
     let current_vault = cfg.vault_path.to_string_lossy();
-    print!("Vault path [{}]: ", current_vault);
+    print!("Vault path [{current_vault}]: ");
     io::stdout().flush()?;
     let mut input = String::new();
     let _ = io::stdin().read_line(&mut input)?;

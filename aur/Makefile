@@ -5,6 +5,7 @@ PKGNAME = obsidian-cli-inspector
 REPO_OWNER = jingyi-zhao-01
 REPO_NAME = obsidian-cli-inspector
 VERSION ?= unknown
+NORM_VERSION := $(patsubst v%,%,$(VERSION))
 
 TARBALL = source.tar.gz
 SHA256_FILE = .sha256
@@ -26,7 +27,7 @@ help:
 # ============================================================
 
 all: validate download checksum generate-pkgbuild generate-srcinfo
-	@echo "✓ Generated PKGBUILD and .SRCINFO for v$(VERSION)"
+	@echo "✓ Generated PKGBUILD and .SRCINFO for v$(NORM_VERSION)"
 
 
 # ============================================================
@@ -45,9 +46,9 @@ validate:
 # ============================================================
 
 download:
-	@echo "Downloading tarball for v$(VERSION)..."
+	@echo "Downloading tarball for v$(NORM_VERSION)..."
 	@rm -f $(TARBALL)
-	@curl -sL "https://github.com/$(REPO_OWNER)/$(REPO_NAME)/archive/refs/tags/v$(VERSION).tar.gz" -o $(TARBALL)
+	@curl -sL "https://github.com/$(REPO_OWNER)/$(REPO_NAME)/archive/refs/tags/v$(NORM_VERSION).tar.gz" -o $(TARBALL)
 
 # ============================================================
 # Step 3: Compute SHA256
@@ -62,7 +63,7 @@ checksum:
 
 generate-pkgbuild:
 	@echo "Generating PKGBUILD..."
-	@./generate-pkgbuild.sh $(PKGNAME) $(VERSION) "$$(cat $(SHA256_FILE))" $(REPO_OWNER) $(REPO_NAME) > PKGBUILD
+	@./generate-pkgbuild.sh $(PKGNAME) $(NORM_VERSION) "$$(cat $(SHA256_FILE))" $(REPO_OWNER) $(REPO_NAME) > PKGBUILD
 
 # ============================================================
 # Step 5: Generate .SRCINFO

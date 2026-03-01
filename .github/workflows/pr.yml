@@ -130,43 +130,6 @@ jobs:
 
   aur-dry-run:
     name: AUR Build Dry Run
-    runs-on: ubuntu-latest
     needs: validate
     if: github.event.pull_request.draft == false
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Extract version from Cargo.toml
-        id: version
-        run: |
-          VERSION=$(grep '^version' Cargo.toml | head -n1 | sed 's/version = "\(.*\)"/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Generate PKGBUILD and .SRCINFO
-        run: |
-          cd aur
-          make VERSION=${{ steps.version.outputs.VERSION }} all
-
-      - name: Verify artifacts exist
-        run: |
-          test -f ./aur/PKGBUILD || (echo "PKGBUILD not found" && exit 1)
-          test -f ./aur/.SRCINFO || (echo ".SRCINFO not found" && exit 1)
-
-      - name: Create non-root user and configure Docker access
-        run: |
-          sudo useradd -m builder
-          sudo chown -R builder ./aur
-          sudo usermod -aG docker builder
-
-      - name: Run PKGBUILD checks as builder
-        run: |
-          sudo -u builder bash -c '
-            cd aur
-            make syntax-check
-            make build-test
-          '
+    uses: ./.github/workflows/aur-dry-run.yml

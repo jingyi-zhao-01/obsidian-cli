@@ -1,0 +1,75 @@
+name: AUR Build Dry Run
+
+on:
+  workflow_call:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  aur-dry-run:
+    name: AUR Build Dry Run
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+
+      # ------------------------------------------------------------
+      # 1️Checkout
+      # ------------------------------------------------------------
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # ------------------------------------------------------------
+      # 2️Extract version
+      # ------------------------------------------------------------
+      - name: Extract version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(grep '^version' Cargo.toml | head -n1 | sed 's/version = "\(.*\)"/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      # ------------------------------------------------------------
+      # 3️Generate PKGBUILD + .SRCINFO
+      # ------------------------------------------------------------
+      - name: Generate PKGBUILD
+        run: |
+          cd aur
+          make VERSION=${{ steps.version.outputs.VERSION }} validate
+          make VERSION=${{ steps.version.outputs.VERSION }} download
+          make VERSION=${{ steps.version.outputs.VERSION }} checksum
+          make VERSION=${{ steps.version.outputs.VERSION }} generate-pkgbuild
+
+      - name: Generate .SRCINFO
+        run: |
+          cd aur
+          make generate-srcinfo
+
+      # ------------------------------------------------------------
+      # 4️Verify artifacts
+      # ------------------------------------------------------------
+      - name: Verify PKGBUILD exists
+        run: |
+          test -f aur/PKGBUILD || (echo "PKGBUILD missing" && exit 1)
+
+      - name: Verify .SRCINFO exists
+        run: |
+          test -f aur/.SRCINFO || (echo ".SRCINFO missing" && exit 1)
+
+      # ------------------------------------------------------------
+      # 5️Syntax check (Docker Arch)
+      # ------------------------------------------------------------
+      - name: PKGBUILD syntax check
+        run: |
+          cd aur
+          make syntax-check
+
+      # ------------------------------------------------------------
+      # 6️Full clean build test
+      # ------------------------------------------------------------
+      - name: Full clean Arch build test
+        run: |
+          cd aur
+          make build-test

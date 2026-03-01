@@ -2,6 +2,17 @@ name: AUR Build
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to checkout (branch, tag, or SHA)'
+        required: false
+        type: string
+        default: ''
+      version:
+        description: 'Version override (if not provided, extracts from Cargo.toml)'
+        required: false
+        type: string
+        default: ''
 
 env:
   CARGO_TERM_COLOR: always
@@ -19,6 +30,8 @@ jobs:
       # ------------------------------------------------------------
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       # ------------------------------------------------------------
       # 2) Extract version
@@ -26,9 +39,15 @@ jobs:
       - name: Extract version from Cargo.toml
         id: version
         shell: bash
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
           set -euo pipefail
-          VERSION="$(grep -E '^version\s*=' Cargo.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')"
+          if [ -n "$VERSION_INPUT" ]; then
+            VERSION="$VERSION_INPUT"
+          else
+            VERSION="$(grep -E '^version\s*=' Cargo.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')"
+          fi
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
       # ------------------------------------------------------------
@@ -115,3 +134,15 @@ jobs:
               chown -R builder:builder /work
               su builder -s /bin/bash -c "cd /work/aur && makepkg -sf --noconfirm --cleanbuild --clean"
             '
+
+      # ------------------------------------------------------------
+      # 7) Upload artifacts for potential publishing
+      # ------------------------------------------------------------
+      - name: Upload PKGBUILD and .SRCINFO
+        uses: actions/upload-artifact@v4
+        with:
+          name: aur-package
+          path: |
+            aur/PKGBUILD
+            aur/.SRCINFO
+          retention-days: 1

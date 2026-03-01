@@ -71,8 +71,8 @@ fn test_cli_help_contains_workflow_steps() {
     let long_help = cmd.get_long_about().expect("Long about should be set");
     let help_text = long_help.to_string();
 
-    assert!(help_text.contains("1. Run 'init'"));
-    assert!(help_text.contains("2. Run 'index'"));
+    assert!(help_text.contains("1. Run 'init init'"));
+    assert!(help_text.contains("2. Run 'index index'"));
     assert!(help_text.contains("3. Use query commands"));
 }
 
@@ -82,12 +82,13 @@ fn test_cli_help_contains_example_commands() {
     let long_help = cmd.get_long_about().expect("Long about should be set");
     let help_text = long_help.to_string();
 
-    assert!(help_text.contains("obsidian-cli-inspector init"));
-    assert!(help_text.contains("obsidian-cli-inspector index"));
-    assert!(help_text.contains("obsidian-cli-inspector search"));
-    assert!(help_text.contains("obsidian-cli-inspector backlinks"));
-    assert!(help_text.contains("obsidian-cli-inspector tags"));
-    assert!(help_text.contains("obsidian-cli-inspector bloat"));
+    // New grouped CLI format
+    assert!(help_text.contains("obsidian-cli-inspector init init"));
+    assert!(help_text.contains("obsidian-cli-inspector index index"));
+    assert!(help_text.contains("obsidian-cli-inspector query search"));
+    assert!(help_text.contains("obsidian-cli-inspector query backlinks"));
+    assert!(help_text.contains("obsidian-cli-inspector query tags"));
+    assert!(help_text.contains("obsidian-cli-inspector analyze bloat"));
     assert!(help_text.contains("obsidian-cli-inspector tui"));
 }
 
@@ -130,18 +131,14 @@ fn test_cli_all_subcommands_present() {
     let cmd = Cli::command();
     let subcommands: Vec<_> = cmd.get_subcommands().map(|s| s.get_name()).collect();
 
+    // Current CLI structure - top-level groups
     assert!(subcommands.contains(&"init"));
     assert!(subcommands.contains(&"index"));
-    assert!(subcommands.contains(&"search"));
-    assert!(subcommands.contains(&"backlinks"));
-    assert!(subcommands.contains(&"links"));
-    assert!(subcommands.contains(&"unresolved-links"));
-    assert!(subcommands.contains(&"tags"));
-    assert!(subcommands.contains(&"suggest"));
-    assert!(subcommands.contains(&"bloat"));
-    assert!(subcommands.contains(&"stats"));
+    assert!(subcommands.contains(&"query"));
+    assert!(subcommands.contains(&"analyze"));
+    assert!(subcommands.contains(&"diagnose"));
+    assert!(subcommands.contains(&"view"));
     assert!(subcommands.contains(&"tui"));
-    assert!(subcommands.contains(&"graph"));
 }
 
 #[test]

@@ -157,12 +157,13 @@ jobs:
           test -f ./aur/PKGBUILD || (echo "PKGBUILD not found" && exit 1)
           test -f ./aur/.SRCINFO || (echo ".SRCINFO not found" && exit 1)
 
-      - name: Validate PKGBUILD syntax
-        run: |
-          cd aur
-          make syntax-check
+      - name: Create non-root user for makepkg
+        run: sudo useradd -m builder && sudo chown -R builder ./aur
 
-      - name: Full clean Arch build
+      - name: Run PKGBUILD checks as builder
         run: |
-          cd aur
-          make build-test
+          sudo -u builder bash -c '
+            cd aur
+            make syntax-check
+            make build-test
+          '

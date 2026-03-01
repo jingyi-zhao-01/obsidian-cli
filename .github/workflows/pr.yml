@@ -157,8 +157,11 @@ jobs:
           test -f ./aur/PKGBUILD || (echo "PKGBUILD not found" && exit 1)
           test -f ./aur/.SRCINFO || (echo ".SRCINFO not found" && exit 1)
 
-      - name: Create non-root user for makepkg
-        run: sudo useradd -m builder && sudo chown -R builder ./aur
+      - name: Create non-root user and configure Docker access
+        run: |
+          sudo useradd -m builder
+          sudo chown -R builder ./aur
+          sudo usermod -aG docker builder
 
       - name: Run PKGBUILD checks as builder
         run: |

@@ -1,4 +1,4 @@
-name: AUR Build Dry Run
+name: AUR Build
 
 on:
   workflow_call:
@@ -10,71 +10,106 @@ jobs:
   aur-dry-run:
     name: AUR Build Dry Run
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
 
     steps:
-
       # ------------------------------------------------------------
-      # 1️Checkout
+      # 1) Checkout
       # ------------------------------------------------------------
       - name: Checkout source
         uses: actions/checkout@v4
 
       # ------------------------------------------------------------
-      # 2️Extract version
+      # 2) Extract version
       # ------------------------------------------------------------
       - name: Extract version from Cargo.toml
         id: version
+        shell: bash
         run: |
-          VERSION=$(grep '^version' Cargo.toml | head -n1 | sed 's/version = "\(.*\)"/\1/')
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          VERSION="$(grep -E '^version\s*=' Cargo.toml | head -n1 | sed -E 's/version\s*=\s*"(.*)"/\1/')"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
 
       # ------------------------------------------------------------
-      # 3️Generate PKGBUILD + .SRCINFO
+      # 3) Generate PKGBUILD + .SRCINFO using your Makefile
+      #    NOTE: generate-srcinfo currently uses useradd inside docker,
+      #    which will fail in many CI contexts. We'll generate .SRCINFO
+      #    in Arch container as 'nobody' to avoid useradd.
       # ------------------------------------------------------------
-      - name: Generate PKGBUILD
+      - name: Generate PKGBUILD (validate/download/checksum/generate-pkgbuild)
+        shell: bash
         run: |
+          set -euo pipefail
           cd aur
-          make VERSION=${{ steps.version.outputs.VERSION }} validate
-          make VERSION=${{ steps.version.outputs.VERSION }} download
-          make VERSION=${{ steps.version.outputs.VERSION }} checksum
-          make VERSION=${{ steps.version.outputs.VERSION }} generate-pkgbuild
+          make VERSION="${{ steps.version.outputs.VERSION }}" validate
+          make VERSION="${{ steps.version.outputs.VERSION }}" download
+          make VERSION="${{ steps.version.outputs.VERSION }}" checksum
+          make VERSION="${{ steps.version.outputs.VERSION }}" generate-pkgbuild
 
-      - name: Generate .SRCINFO
+      - name: Generate .SRCINFO (Arch container, non-root)
+        shell: bash
         run: |
-          cd aur
-          make generate-srcinfo
+          set -euo pipefail
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/work" \
+            -w /work/aur \
+            archlinux:latest bash -lc '
+              set -euo pipefail
+              pacman -Sy --noconfirm --needed base-devel git >/dev/null
+              chown -R nobody:nobody /work
+              su nobody -s /bin/bash -c "cd /work/aur && makepkg --printsrcinfo" > /work/aur/.SRCINFO
+            '
 
       # ------------------------------------------------------------
-      # 4️Verify artifacts
+      # 4) Verify artifacts
       # ------------------------------------------------------------
       - name: Verify PKGBUILD exists
+        shell: bash
         run: |
+          set -euo pipefail
           test -f aur/PKGBUILD || (echo "PKGBUILD missing" && exit 1)
 
       - name: Verify .SRCINFO exists
+        shell: bash
         run: |
+          set -euo pipefail
           test -f aur/.SRCINFO || (echo ".SRCINFO missing" && exit 1)
 
       # ------------------------------------------------------------
-      # 5️Syntax check (Docker Arch)
+      # 5) PKGBUILD syntax check
+      #    Your Makefile target runs makepkg as root in docker -> fails.
+      #    Run makepkg --check in Arch container as nobody.
       # ------------------------------------------------------------
-      - name: PKGBUILD syntax check
+      - name: PKGBUILD syntax check (Arch, non-root)
+        shell: bash
         run: |
-            useradd -m builder
-            chown -R builder:builder aur
-            cd aur
-            su builder -c "makepkg --printsrcinfo > .SRCINFO"
-            su builder -c "makepkg --check"
+          set -euo pipefail
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/work" \
+            -w /work/aur \
+            archlinux:latest bash -lc '
+              set -euo pipefail
+              pacman -Sy --noconfirm --needed base-devel cargo git >/dev/null
+              chown -R nobody:nobody /work
+              su nobody -s /bin/bash -c "cd /work/aur && makepkg --check"
+            '
 
       # ------------------------------------------------------------
-      # 6️Full clean build test
+      # 6) Full clean Arch build test
+      #    Your Makefile build-test uses useradd inside docker -> fails.
+      #    Do the equivalent clean build as nobody.
       # ------------------------------------------------------------
-      - name: Full clean Arch build test
+      - name: Full clean Arch build test (Arch, non-root)
+        shell: bash
         run: |
-            useradd -m builder
-            chown -R builder:builder aur
-            cd aur
-            su builder -c "make build-test"
+          set -euo pipefail
+          docker run --rm \
+            -v "${GITHUB_WORKSPACE}:/work" \
+            -w /work/aur \
+            archlinux:latest bash -lc '
+              set -euo pipefail
+              pacman -Sy --noconfirm --needed base-devel cargo git >/dev/null
+              chown -R nobody:nobody /work
+              su nobody -s /bin/bash -c "cd /work/aur && makepkg -i --noconfirm --cleanbuild --clean"
+            '

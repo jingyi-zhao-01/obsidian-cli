@@ -9,12 +9,6 @@ VERSION ?= unknown
 TARBALL = source.tar.gz
 SHA256_FILE = .sha256
 
-# ============================================================
-# Entry Point
-# ============================================================
-
-all: validate download checksum generate-pkgbuild generate-srcinfo
-	@echo "✓ Generated PKGBUILD and .SRCINFO for v$(VERSION)"
 
 # ============================================================
 # Help
@@ -26,6 +20,14 @@ help:
 	@echo "  make syntax-check"
 	@echo "  make build-test"
 	@echo "  make clean"
+
+# ============================================================
+# Entry Point
+# ============================================================
+
+all: validate download checksum generate-pkgbuild generate-srcinfo
+	@echo "✓ Generated PKGBUILD and .SRCINFO for v$(VERSION)"
+
 
 # ============================================================
 # Step 1: Validate Input

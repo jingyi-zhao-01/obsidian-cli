@@ -35,8 +35,14 @@ fn main() -> Result<()> {
         // INIT Commands
         // ============================================================================
         Commands::Init(InitCommands::Init { force }) => {
-            // Prompt the user to confirm/override vault/database/log locations and persist them
-            let config = interactive_config_setup(cli.config)?;
+            // Try to load existing config first, only prompt if it doesn't exist or is invalid
+            let config = match load_config(cli.config.clone()) {
+                Ok(cfg) => cfg,
+                Err(_) => {
+                    // Config doesn't exist or is invalid - do interactive setup
+                    interactive_config_setup(cli.config)?
+                }
+            };
 
             // Create a logger using the (possibly updated) config so init logs go to the right place
             let cmd_logger = Logger::new(config.log_dir()).ok();

@@ -1,7 +1,7 @@
 # Obsidian CLI Inspector
 
 
-- Note: THIS Feature currently is in beta
+- Note: THIS Feature currently is in alpha
 
 
 [![GitHub](https://img.shields.io/badge/GitHub-obsidian--cli-black?logo=github)](https://github.com/jingyi-zhao-01/obsidian-cli)

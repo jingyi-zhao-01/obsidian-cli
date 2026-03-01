@@ -33,9 +33,9 @@ jobs:
           configFile: commitlint.config.mjs
 
   validate:
-    name: Lint, Test, Coverage
+    name: Lint, Format, Test
     runs-on: ubuntu-latest
-    needs: commit-lint
+    needs: [commit-lint]
     if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'autorelease:pending')
 
     permissions:
@@ -61,10 +61,34 @@ jobs:
       - name: Run tests
         run: make test
 
-  codecov:
-    name: Upload coverage reports to Codecov
+  e2e:
+    name: E2E Tests
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [commit-lint]
+    if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'autorelease:pending')
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: test CLI commands
+        run: make -C e2e test-cli
+      - name: test machine contract commands
+        run: make -C e2e test-machine-contract
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    needs: [validate, e2e]
     if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'autorelease:pending')
     permissions:
       contents: read
@@ -109,7 +133,7 @@ jobs:
   cargo-publish-dry-run:
     name: Cargo Publish Dry Run
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [coverage]
     if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'autorelease:pending')
 
     permissions:
@@ -130,6 +154,6 @@ jobs:
 
   aur-dry-run:
     name: AUR Build
-    needs: validate
+    needs: [coverage]
     if: github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'autorelease:pending')
     uses: ./.github/workflows/aur-build.yml

@@ -57,35 +57,56 @@ vault_path = "/path/to/your/obsidian/vault"
 2) Initialize and index your vault:
 
 ```bash
-obsidian-cli-inspector init
-obsidian-cli-inspector index
+obsidian-cli-inspector init init
+obsidian-cli-inspector index index
 ```
 
 3) Explore your notes:
 
 ```bash
-obsidian-cli-inspector search "your query"
-obsidian-cli-inspector backlinks "Note Name"
-obsidian-cli-inspector tags productivity
-obsidian-cli-inspector stats
+obsidian-cli-inspector query search "your query"
+obsidian-cli-inspector query backlinks "Note Name"
+obsidian-cli-inspector query tags productivity
+obsidian-cli-inspector view stats
 ```
 
 ## Common commands
 
 ```bash
-obsidian-cli-inspector init [--force]
-obsidian-cli-inspector index [--dry-run] [--force] [--verbose]
-obsidian-cli-inspector search "query" [--limit 20]
-obsidian-cli-inspector backlinks "Note Name"
-obsidian-cli-inspector links "Note Name"
-obsidian-cli-inspector unresolved-links
-obsidian-cli-inspector tags [tag-name] [--all]
-obsidian-cli-inspector suggest "Note Name" [--limit 10]
-obsidian-cli-inspector bloat [--threshold 50000] [--limit 10]
-obsidian-cli-inspector stats
+# Init & Index
+obsidian-cli-inspector init init [--force]
+obsidian-cli-inspector index index [--dry-run] [--force] [--verbose]
+
+# Query
+obsidian-cli-inspector query search "query" [--limit 20]
+obsidian-cli-inspector query backlinks "Note Name"
+obsidian-cli-inspector query links "Note Name"
+obsidian-cli-inspector query unresolved
+obsidian-cli-inspector query tags [tag-name] [--list]
+
+# Analyze
+obsidian-cli-inspector analyze related "Note Name" [--limit 10]
+obsidian-cli-inspector analyze bloat [--threshold 50000] [--limit 10]
+
+# View
+obsidian-cli-inspector view stats
+obsidian-cli-inspector view describe "Note Name"
+
+# Diagnose
+obsidian-cli-inspector diagnose orphans [--exclude-templates] [--exclude-daily]
+obsidian-cli-inspector diagnose broken-links
+
+# Interactive
 obsidian-cli-inspector tui
-obsidian-cli-inspector graph ["Note Name"] [--depth 2]
 ```
+
+## CLI Contract
+
+The CLI follows a structured command pattern. See [docs/cli-contract.md](docs/cli-contract.md) for the full CLI contract, including the new group-based command structure and migration guide.
+
+## Machine Contracts (v1.1.0+)
+
+For agent integration, use JSON output with deterministic contracts. See [docs/machine-contract.md](docs/machine-contract.md) for full documentation.
 
 ## Configuration
 

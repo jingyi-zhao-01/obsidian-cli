@@ -31,8 +31,12 @@ build_pkgbuild() {
         '  # Prevent CI or user environment from injecting static Rust flags' \
         '  unset RUSTFLAGS' \
         '  unset CARGO_ENCODED_RUSTFLAGS' \
+        '  unset CARGO_NET_OFFLINE' \
         '' \
-        '  cargo build --release --locked --frozen' \
+        '  # Ensure GNU linker is used (avoid ld.lld issues)' \
+        '  export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=gcc' \
+        '' \
+        '  cargo build --release --locked' \
         '}' \
         '' \
         'package() {' \

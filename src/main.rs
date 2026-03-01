@@ -72,31 +72,28 @@ fn main() -> Result<()> {
         // QUERY Commands
         // ============================================================================
         Commands::Query(QueryCommands::Search { query, limit }) => {
-            let config = load_config(cli.config)?;
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("query.search", "Starting Search Command");
             }
-            (
-                "query.search",
-                Ok(show_search(&query, limit, logger.as_ref())),
-            )
+            show_search(&query, limit, logger.as_ref());
+            ("query.search", Ok(()))
         }
         Commands::Query(QueryCommands::Backlinks { note }) => {
-            let config = load_config(cli.config)?;
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("query.backlinks", "Starting Backlinks Command");
             }
-            (
-                "query.backlinks",
-                Ok(show_backlinks(&note, logger.as_ref())),
-            )
+            show_backlinks(&note, logger.as_ref());
+            ("query.backlinks", Ok(()))
         }
         Commands::Query(QueryCommands::Links { note }) => {
-            let config = load_config(cli.config)?;
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("query.links", "Starting Links Command");
             }
-            ("query.links", Ok(show_links(&note, logger.as_ref())))
+            show_links(&note, logger.as_ref());
+            ("query.links", Ok(()))
         }
         Commands::Query(QueryCommands::Unresolved) => {
             let config = load_config(cli.config)?;
@@ -109,39 +106,33 @@ fn main() -> Result<()> {
             )
         }
         Commands::Query(QueryCommands::Tags { tag, list }) => {
-            let config = load_config(cli.config)?;
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("query.tags", "Starting Tags Command");
             }
-            ("query.tags", Ok(show_tags(&tag, list, logger.as_ref())))
+            show_tags(&tag, list, logger.as_ref());
+            ("query.tags", Ok(()))
         }
 
         // ============================================================================
         // ANALYZE Commands
         // ============================================================================
         Commands::Analyze(AnalyzeCommands::Bloat { threshold, limit }) => {
-            let config = load_config(cli.config)?;
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("analyze.bloat", "Starting Bloat Command");
             }
-            (
-                "analyze.bloat",
-                Ok(show_bloat(threshold, limit, logger.as_ref())),
-            )
+            show_bloat(threshold, limit, logger.as_ref());
+            ("analyze.bloat", Ok(()))
         }
-        Commands::Analyze(AnalyzeCommands::Related { note, limit }) => {
-            let config = load_config(cli.config)?;
+        Commands::Analyze(AnalyzeCommands::Related { note: _, limit: _ }) => {
+            let _config = load_config(cli.config)?;
             if let Some(ref log) = logger {
                 let _ = log.log_section("analyze.related", "Starting Related Command");
             }
             // Related is not yet implemented - show unimplemented message
-            (
-                "analyze.related",
-                Ok(show_unimplemented(
-                    "analyze.related - not yet implemented",
-                    logger.as_ref(),
-                )),
-            )
+            show_unimplemented("analyze.related - not yet implemented", logger.as_ref());
+            ("analyze.related", Ok(()))
         }
 
         // ============================================================================
@@ -323,7 +314,7 @@ fn interactive_config_setup(path: Option<PathBuf>) -> Result<Config> {
 
     // 1) Vault path (required)
     let current_vault = cfg.vault_path.to_string_lossy();
-    print!("Vault path [{}]: ", current_vault);
+    print!("Vault path [{current_vault}]: ");
     io::stdout().flush()?;
     let mut input = String::new();
     let _ = io::stdin().read_line(&mut input)?;

@@ -1,6 +1,6 @@
 # Obsidian CLI Inspector Test Vault Configuration
 
-vault_path = "/home/jingyi/jingyi-vault"
+vault_path = "/home/jingyi/RustroverProjects/obsidian-cli-inspector/tests/test-vault"
 
 # Database will be created in project directory for testing
 database_path = "/home/jingyi/RustroverProjects/obsidian-cli-inspector/tests/test.db"

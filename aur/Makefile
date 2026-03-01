@@ -45,7 +45,6 @@ all:
 	      'package() {' \
 	      '  cd "$${srcdir}/$${pkgname}-$${pkgver}"' \
 	      '  install -Dm755 target/release/$${pkgname} "$${pkgdir}/usr/bin/$${pkgname}"' \
-	      '  install -Dm644 LICENSE "$${pkgdir}/usr/share/licenses/$${pkgname}/LICENSE"' \
 	      '}'; \
 	  } > PKGBUILD
 	@rm -f source.tar.gz && \
